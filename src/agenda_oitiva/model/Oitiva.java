@@ -62,6 +62,16 @@ public class Oitiva {
 	         + "\nObs       : " + observacao;
 	}
 
+	private int idOitiva;
+
+	public void setIdOitiva(int idOitiva) {
+	    this.idOitiva = idOitiva;
+	}
+
+	public int getIdOitiva() {
+	    return idOitiva;
+	}
+
 	
 
 }

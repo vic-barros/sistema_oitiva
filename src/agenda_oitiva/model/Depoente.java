@@ -8,6 +8,10 @@ public class Depoente extends Pessoa {
 		this.tipo = tipo;
 	}
 
+	public Depoente() {
+		super();
+	}
+
 	@Override
 	public TipoPessoa getTipoDePessoa() {
 		return tipo;

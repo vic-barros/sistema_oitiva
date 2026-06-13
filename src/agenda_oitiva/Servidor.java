@@ -1,22 +1,26 @@
-package agenda_oitiva.model;
+package agenda_oitiva;
 
 import com.sun.net.httpserver.*;
 
-import agenda_oitiva.controller.SistemaLogin;
+import agenda_oitiva.dao.DepoenteDAO;
+import agenda_oitiva.dao.FuncionarioDAO;
+import agenda_oitiva.dao.OitivaDAO;
+import agenda_oitiva.model.Depoente;
+import agenda_oitiva.model.FuncionarioDelegacia;
+import agenda_oitiva.model.Oitiva;
+import agenda_oitiva.model.ProcedimentoPolicial;
+import agenda_oitiva.model.StatusOitiva;
+import agenda_oitiva.model.TipoPessoa;
 
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
 public class Servidor {
 
-    private Agenda agenda;
-    private SistemaLogin sistemaLogin;
-
-    public Servidor(Agenda agenda, SistemaLogin sistemaLogin) {
-        this.agenda = agenda;
-        this.sistemaLogin = sistemaLogin;
-    }
+    private OitivaDAO oitivaDAO = new OitivaDAO();
+    private FuncionarioDAO funcionarioDAO = new FuncionarioDAO();
 
     public void iniciar() throws Exception {
         HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
@@ -62,17 +66,36 @@ public class Servidor {
         int idx = json.indexOf(chave);
         if (idx == -1) return "";
         int inicio = json.indexOf(":", idx) + 1;
-        // valor numérico
         char primeiro = json.substring(inicio).trim().charAt(0);
         if (Character.isDigit(primeiro)) {
             int fim = json.indexOf(",", inicio);
             if (fim == -1) fim = json.indexOf("}", inicio);
             return json.substring(inicio, fim).trim();
         }
-        // valor string
         int aspasAbrem = json.indexOf("\"", inicio) + 1;
         int aspasFecham = json.indexOf("\"", aspasAbrem);
         return json.substring(aspasAbrem, aspasFecham);
+    }
+
+    private String montarJsonOitiva(Oitiva o, int indice) {
+        return "{" +
+            "\"indice\":" + indice + "," +
+            "\"idOitiva\":" + o.getIdOitiva() + "," +
+            "\"nomeDepoente\":\"" + o.getPessoaIntimada().getNome() + "\"," +
+            "\"cpfDepoente\":\"" + o.getPessoaIntimada().getCpf() + "\"," +
+            "\"tipoPessoa\":\"" + o.getPessoaIntimada().getTipoDePessoa() + "\"," +
+            "\"numOcorrencia\":" + o.getProcedimento().getNumeroOcorrencia() + "," +
+            "\"anoOcorrencia\":" + o.getProcedimento().getAnoOcorrencia() + "," +
+            "\"crime\":\"" + o.getProcedimento().getCrime() + "\"," +
+            "\"dia\":" + o.getDataHora().getDayOfMonth() + "," +
+            "\"mes\":" + o.getDataHora().getMonthValue() + "," +
+            "\"ano\":" + o.getDataHora().getYear() + "," +
+            "\"hora\":" + o.getDataHora().getHour() + "," +
+            "\"minuto\":" + o.getDataHora().getMinute() + "," +
+            "\"funcionarioResponsavel\":\"" + o.getFuncionarioResponsavel().getNome() + "\"," +
+            "\"status\":\"" + o.getStatus() + "\"," +
+            "\"observacao\":\"" + o.getObservacao() + "\"" +
+            "}";
     }
 
     // ── ROTAS ────────────────────────────────────────────────
@@ -87,11 +110,12 @@ public class Servidor {
         String login = extrairCampo(corpo, "login");
         String senha = extrairCampo(corpo, "senha");
 
-        FuncionarioDelegacia f = sistemaLogin.autenticar(login, senha);
+        FuncionarioDelegacia f = funcionarioDAO.buscarPorLogin(login);
 
-        if (f != null) {
+        if (f != null && f.verificarSenha(senha)) {
             String json = "{\"sucesso\":true,\"nome\":\"" + f.getNome()
-                    + "\",\"cargo\":\"" + f.getCargo() + "\"}";
+                    + "\",\"cargo\":\"" + f.getCargo()
+                    + "\",\"login\":\"" + f.getLogin() + "\"}";
             enviarResposta(ex, 200, json);
         } else {
             enviarResposta(ex, 401, "{\"sucesso\":false}");
@@ -105,27 +129,11 @@ public class Servidor {
         }
 
         if (ex.getRequestMethod().equalsIgnoreCase("GET")) {
+            ArrayList<Oitiva> lista = oitivaDAO.listarTodas();
             StringBuilder sb = new StringBuilder("[");
-            for (int i = 0; i < agenda.totalOitivas(); i++) {
-                Oitiva o = agenda.getOitiva(i);
+            for (int i = 0; i < lista.size(); i++) {
                 if (i > 0) sb.append(",");
-                sb.append("{")
-                  .append("\"indice\":").append(i).append(",")
-                  .append("\"nomeDepoente\":\"").append(o.getPessoaIntimada().getNome()).append("\",")
-                  .append("\"cpfDepoente\":\"").append(o.getPessoaIntimada().getCpf()).append("\",")
-                  .append("\"tipoPessoa\":\"").append(o.getPessoaIntimada().getTipoDePessoa()).append("\",")
-                  .append("\"numOcorrencia\":").append(o.getProcedimento().getNumeroOcorrencia()).append(",")
-                  .append("\"anoOcorrencia\":").append(o.getProcedimento().getAnoOcorrencia()).append(",")
-                  .append("\"crime\":\"").append(o.getProcedimento().getCrime()).append("\",")
-                  .append("\"dia\":").append(o.getDataHora().getDayOfMonth()).append(",")
-                  .append("\"mes\":").append(o.getDataHora().getMonthValue()).append(",")
-                  .append("\"ano\":").append(o.getDataHora().getYear()).append(",")
-                  .append("\"hora\":").append(o.getDataHora().getHour()).append(",")
-                  .append("\"minuto\":").append(o.getDataHora().getMinute()).append(",")
-                  .append("\"funcionarioResponsavel\":\"").append(o.getFuncionarioResponsavel().getNome()).append("\",")
-                  .append("\"status\":\"").append(o.getStatus()).append("\",")
-                  .append("\"observacao\":\"").append(o.getObservacao()).append("\"")
-                  .append("}");
+                sb.append(montarJsonOitiva(lista.get(i), i));
             }
             sb.append("]");
             enviarResposta(ex, 200, sb.toString());
@@ -150,10 +158,10 @@ public class Servidor {
                 TipoPessoa tipo = TipoPessoa.valueOf(tipoStr);
                 Depoente depoente = new Depoente(nomeDepoente, cpfDepoente, tipo);
                 ProcedimentoPolicial proc = new ProcedimentoPolicial(numOc, anoOc, crime);
-                FuncionarioDelegacia resp = sistemaLogin.buscarPorLogin(loginResp);
+                FuncionarioDelegacia resp = funcionarioDAO.buscarPorLogin(loginResp);
 
                 Oitiva oitiva = new Oitiva(depoente, proc, resp, dia, mes, ano, hora, minuto, obs);
-                agenda.adicionarOitiva(oitiva);
+                oitivaDAO.inserir(oitiva);
                 enviarResposta(ex, 200, "{\"sucesso\":true}");
             } catch (Exception e) {
                 enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + e.getMessage() + "\"}");
@@ -167,9 +175,15 @@ public class Servidor {
             return;
         }
         String corpo = lerCorpo(ex);
-        int indice = Integer.parseInt(extrairCampo(corpo, "indice"));
+        int idOitiva = Integer.parseInt(extrairCampo(corpo, "indice"));
         String novoStatus = extrairCampo(corpo, "status");
-        agenda.alterarStatus(indice, StatusOitiva.valueOf(novoStatus));
+
+        // busca o id real da oitiva
+        ArrayList<Oitiva> lista = oitivaDAO.listarTodas();
+        if (idOitiva >= 0 && idOitiva < lista.size()) {
+            int idReal = lista.get(idOitiva).getIdOitiva();
+            oitivaDAO.alterarStatus(idReal, StatusOitiva.valueOf(novoStatus));
+        }
         enviarResposta(ex, 200, "{\"sucesso\":true}");
     }
 
@@ -180,7 +194,13 @@ public class Servidor {
         }
         String corpo = lerCorpo(ex);
         int indice = Integer.parseInt(extrairCampo(corpo, "indice"));
-        agenda.removerOitiva(indice);
+
+        // busca o id real da oitiva pelo indice
+        ArrayList<Oitiva> lista = oitivaDAO.listarTodas();
+        if (indice >= 0 && indice < lista.size()) {
+            int idReal = lista.get(indice).getIdOitiva();
+            oitivaDAO.remover(idReal);
+        }
         enviarResposta(ex, 200, "{\"sucesso\":true}");
     }
 }

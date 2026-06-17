@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polícia Civil - Sistema de Agendamento de Oitivas</title>
+    <style>
+        :root {
+            --primary-color: #1a202c;
+            --secondary-color: #2d3748;
+            --accent-color: #3182ce;
+            --accent-hover: #2b6cb0;
+            --bg-color: #edf2f7;
+            --card-bg: #ffffff;
+            --text-color: #2d3748;
+            --border-color: #cbd5e0;
+            
+            /* Cores dos Status das Oitivas baseadas no seu backend Java (StatusOitiva) */
+            --status-pendente: #feebc8;
+            --status-pendente-text: #975a16;
+            --status-agendada: #ebf8ff;
+            --status-agendada-text: #2b6cb0;
+            --status-realizada: #c6f6d5;
+            --status-realizada-text: #22543d;
+            --status-remarcada: #e2e8f0;
+            --status-remarcada-text: #4a5568;
+            --status-cancelada: #fed7d7;
+            --status-cancelada-text: #9b2c2c;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        }
+        
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--text-color); 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+        }
+
+        /* Tela de Login */
+        .login-screen { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            flex: 1; 
+            padding: 20px; 
+        }
+        
+        .login-card { 
+            background: var(--card-bg); 
+            padding: 40px; 
+            border-radius: 8px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15); 
+            width: 100%; 
+            max-width: 400px; 
+            border-top: 5px solid var(--primary-color); 
+        }
+        
+        .login-card h2 { 
+            text-align: center; 
+            margin-bottom: 10px; 
+            color: var(--primary-color); 
+        }
+        
+        .login-card h5 { 
+            text-align: center; 
+            color: #718096; 
+            margin-bottom: 30px; 
+            font-weight: 500; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+        }
+
+        /* Estrutura do App Principal */
+        .app-screen { 
+            display: none; 
+            flex-direction: column; 
+            flex: 1; 
+        }
+        
+        header { 
+            background-color: var(--primary-color); 
+            color: white; 
+            padding: 15px 30px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+        }
+        
+        header .title { 
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            letter-spacing: 0.5px; 
+        }
+        
+        header .user-badge { 
+            background: var(--secondary-color); 
+            padding: 8px 15px; 
+            border-radius: 20px; 
+            font-size: 0.9rem; 
+            border: 1px solid #4a5568; 
+        }
+        
+        header button { 
+            background: #e53e3e; 
+            color: white; 
+            border: none; 
+            padding: 6px 12px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            margin-left: 15px; 
+            font-size: 0.85rem; 
+        }
+        
+        header button:hover { 
+            background: #c53030; 
+        }
+
+        .main-container { 
+            padding: 30px; 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            width: 100%; 
+            display: grid; 
+            grid-template-columns: 280px 1fr; 
+            gap: 30px; 
+            flex: 1; 
+        }
+
+        /* Sidebar lateral */
+        .sidebar {
+            background: var(--card-bg);
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            padding: 15px 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            height: fit-content;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-item {
+            padding: 12px 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #4a5568;
+            cursor: pointer;
+            border-left: 4px solid transparent;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-item:hover, .sidebar-item.active {
+            background: #f7fafc;
+            color: var(--accent-color);
+        }
+
+        .sidebar-item.active {
+            border-left-color: var(--accent-color);
+            background: #ebf8ff;
+        }
+
+        /* Elementos de Formulários */
+        .form-group { 
+            margin-bottom: 15px; 
+        }
+        
+        .form-group label { 
+            display: block; 
+            margin-bottom: 5px; 
+            font-size: 0.85rem; 
+            font-weight: 600; 
+            color: #4a5568; 
+            text-transform: uppercase; 
+        }
+        
+        input, select, textarea { 
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid var(--border-color); 
+            border-radius: 6px; 
+            background-color: #fff; 
+            color: var(--text-color); 
+            font-size: 0.95rem; 
+            transition: border 0.2s; 
+        }
+        
+        input:focus, select:focus, textarea:focus { 
+            outline: none; 
+            border-color: var(--accent-color); 
+            box-shadow: 0 0 0 3px rgba(49,130,206,0.15); 
+        }
+        
+        .inline-fields { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); 
+            gap: 10px; 
+        }
+
+        button.btn-primary { 
+            width: 100%; 
+            background-color: var(--accent-color); 
+            color: white; 
+            border: none; 
+            padding: 12px; 
+            border-radius: 6px; 
+            font-size: 1rem; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: background 0.2s; 
+        }
+        
+        button.btn-primary:hover { 
+            background-color: var(--accent-hover); 
+        }
+
+        /* Seções e Listas */
+        .card { 
+            background: var(--card-bg); 
+            border-radius: 8px; 
+            padding: 25px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+            border: 1px solid #e2e8f0; 
+            height: fit-content; 
+        }
+        
+        .card h3 { 
+            margin-bottom: 20px; 
+            font-size: 1.1rem; 
+            color: var(--primary-color); 
+            border-bottom: 2px solid #edf2f7; 
+            padding-bottom: 10px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .table-responsive { 
+            overflow-x: auto; 
+            margin-top: 15px; 
+        }
+        
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            text-align: left; 
+            font-size: 0.95rem; 
+        }
+        
+        th { 
+            background-color: #f7fafc; 
+            color: #4a5568; 
+            font-weight: 600; 
+            padding: 12px 15px; 
+            border-bottom: 2px solid #e2e8f0; 
+            text-transform: uppercase; 
+            font-size: 0.8rem; 
+        }
+        
+        td { 
+            padding: 12px 15px; 
+            border-bottom: 1px solid #edf2f7; 
+            vertical-align: middle; 
+        }
+        
+        tr:hover td { 
+            background-color: #f8fafc; 
+        }
+
+        /* Componentes de Feedback */
+        .badge-status { 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-size: 0.75rem; 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            display: inline-block; 
+        }
+        
+        .status-PENDENTE { background-color: var(--status-pendente); color: var(--status-pendente-text); }
+        .status-AGENDADA { background-color: var(--status-agendada); color: var(--status-agendada-text); }
+        .status-REALIZADA { background-color: var(--status-realizada); color: var(--status-realizada-text); }
+        .status-REMARCADA { background-color: var(--status-remarcada); color: var(--status-remarcada-text); }
+        .status-CANCELADA { background-color: var(--status-cancelada); color: var(--status-cancelada-text); }
+
+        .badge-tipo { 
+            background: #edf2f7; 
+            color: #4a5568; 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            font-size: 0.75rem; 
+            font-weight: 600; 
+        }
+
+        .filter-bar { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr 150px; 
+            gap: 15px; 
+            margin-bottom: 20px; 
+            background: #f7fafc; 
+            padding: 15px; 
+            border-radius: 6px; 
+            border: 1px solid #e2e8f0; 
+        }
+
+        .btn-action { 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-size: 0.8rem; 
+            border: 1px solid #cbd5e0; 
+            cursor: pointer; 
+            background: white; 
+            margin-right: 5px; 
+        }
+        
+        .btn-delete { 
+            color: #e53e3e; 
+            border-color: #fed7d7; 
+        }
+        
+        .btn-delete:hover { 
+            background: #fed7d7; 
+        }
+        
+        .select-status-inline { 
+            padding: 5px; 
+            font-size: 0.8rem; 
+            width: auto; 
+            display: inline-block; 
+        }
+
+        .error-message { 
+            color: #e53e3e; 
+            background: #fed7d7; 
+            padding: 10px; 
+            border-radius: 4px; 
+            margin-bottom: 15px; 
+            font-size: 0.9rem; 
+            display: none; 
+            text-align: center; 
+        }
+
+        /* Notificação Personalizada (Toast) */
+        #customToast {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #2b6cb0;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 10000;
+            font-weight: bold;
+            font-size: 0.95rem;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        /* Diálogo de Confirmação Personalizado */
+        #customConfirmModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .confirm-card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .confirm-title {
+            color: var(--primary-color);
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+        }
+
+        .confirm-text {
+            color: #4a5568;
+            margin-bottom: 24px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .confirm-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .btn-modal {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-modal-cancel {
+            background-color: #edf2f7;
+            color: #4a5568;
+        }
+
+        .btn-modal-cancel:hover {
+            background-color: #e2e8f0;
+        }
+
+        .btn-modal-confirm {
+            background-color: #e53e3e;
+            color: white;
+        }
+
+        .btn-modal-confirm:hover {
+            background-color: #c53030;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Notificação Flutuante -->
+    <div id="customToast">Mensagem aqui</div>
+
+    <!-- Caixa de Confirmação customizada -->
+    <div id="customConfirmModal">
+        <div class="confirm-card">
+            <h4 class="confirm-title">Confirmar Ação</h4>
+            <p class="confirm-text" id="confirmMessage">Deseja realmente prosseguir?</p>
+            <div class="confirm-actions">
+                <button class="btn-modal btn-modal-cancel" id="btnConfirmCancel">Cancelar</button>
+                <button class="btn-modal btn-modal-confirm" id="btnConfirmOk">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tela de Login -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-card">
+            <h2>SISTEMA OITIVAS</h2>
+            <h5>Segurança Pública</h5>
+            
+            <div class="error-message" id="loginError">Acesso negado! Login ou senha incorretos.</div>
+            
+            <div class="form-group">
+                <label>Login</label>
+                <input type="text" id="inputLogin" placeholder="Ex: admin" required>
+            </div>
+            <div class="form-group" style="margin-bottom: 25px;">
+                <label>Senha</label>
+                <input type="password" id="inputSenha" placeholder="••••••••" required>
+            </div>
+            <button class="btn-primary" onclick="executarLogin()">Acessar Sistema</button>
+            
+            <div style="margin-top: 20px; font-size: 0.75rem; color: #a0aec0; text-align: center; line-height: 1.4;">
+                Dica de Teste (Usuários Java):<br>
+                Policial: <strong>admin</strong> / senha: <strong>admin</strong><br>
+                Estagiário: <strong>estagiario</strong> / senha: <strong>estagiario</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estrutura Principal -->
+    <div class="app-screen" id="appScreen">
+        <header>
+            <div class="title">POLÍCIA CIVIL - AGENDAMENTO DE OITIVAS</div>
+            <div>
+                <span class="user-badge">
+                    Bem-vindo(a), <strong id="lblUsuario">Nome</strong> | Cargo: <span id="lblCargo">Cargo</span>
+                </span>
+                <button onclick="efetuarLogout()">Sair</button>
+            </div>
+        </header>
+
+        <div class="main-container">
+            
+            <!-- MENU LATERAL RESPONSIVO -->
+            <aside class="sidebar">
+                <ul class="sidebar-menu" id="menuLateral">
+                    <!-- Gerado dinamicamente via JS de acordo com o nível de acesso -->
+                </ul>
+            </aside>
+
+            <!-- CONTEÚDO DINÂMICO -->
+            <div class="content-area">
+                
+                <!-- SEÇÃO: CADASTRAR OITIVA (Apenas Policial) -->
+                <section id="sec-cadastrar-oitiva" class="content-section card">
+                    <h3>1. Cadastrar Nova Oitiva</h3>
+                    <form id="formOitiva" onsubmit="cadastrarOitivaSimulada(event)">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div class="form-group">
+                                <label>Nome do Depoente</label>
+                                <input type="text" id="nomeDepoente" required placeholder="Nome completo">
+                            </div>
+                            <div class="form-group">
+                                <label>CPF do Depoente</label>
+                                <input type="text" id="cpfDepoente" placeholder="Opcional - Ex: 000.000.000-00">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Tipo de Pessoa</label>
+                            <select id="tipoPessoa">
+                                <option value="VITIMA">VÍTIMA</option>
+                                <option value="SUSPEITO">SUSPEITO</option>
+                                <option value="TESTEMUNHA">TESTEMUNHA</option>
+                            </select>
+                        </div>
+
+                        <!-- Procedimento Policial -->
+                        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #e2e8f0; display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 15px;">
+                            <div class="form-group">
+                                <label>Nº Ocorrência</label>
+                                <input type="number" id="numOcorrencia" min="1" required placeholder="Nº">
+                            </div>
+                            <div class="form-group">
+                                <label>Ano Ocorrência</label>
+                                <input type="number" id="anoOcorrencia" value="2026" min="1980" max="2026" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Crime Investigado</label>
+                                <input type="text" id="crime" placeholder="Ex: Roubo Majorado" required>
+                            </div>
+                        </div>
+
+                        <!-- Data e Horário -->
+                        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #e2e8f0;">
+                            <label style="font-weight: bold; margin-bottom: 10px; font-size: 0.85rem; color: #4a5568;">DATA E HORÁRIO</label>
+                            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">
+                                <div class="form-group">
+                                    <label style="font-size: 11px;">Dia</label>
+                                    <input type="number" id="dia" min="1" max="31" required placeholder="DD">
+                                </div>
+                                <div class="form-group">
+                                    <label style="font-size: 11px;">Mês</label>
+                                    <input type="number" id="mes" min="1" max="12" required placeholder="MM">
+                                </div>
+                                <div class="form-group">
+                                    <label style="font-size: 11px;">Ano</label>
+                                    <input type="number" id="ano" value="2026" required placeholder="AAAA">
+                                </div>
+                                <div class="form-group">
+                                    <label style="font-size: 11px;">Hora</label>
+                                    <input type="number" id="hora" min="0" max="23" required placeholder="HH">
+                                </div>
+                                <div class="form-group">
+                                    <label style="font-size: 11px;">Minuto</label>
+                                    <input type="number" id="minuto" min="0" max="59" value="00" required placeholder="MM">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Observações</label>
+                            <textarea id="observacao" rows="3" placeholder="Insira observações importantes para a oitiva..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn-primary" style="margin-top: 10px;">Agendar Oitiva</button>
+                    </form>
+                </section>
+
+                <!-- SEÇÃO: LISTAR & BUSCAR OITIVAS -->
+                <section id="sec-listar-oitivas" class="content-section card">
+                    <h3>
+                        <span>Acervo Geral de Oitivas</span>
+                        <span id="totalBadge" style="font-size: 0.85rem; background: var(--primary-color); color: white; padding: 2px 8px; border-radius: 10px;">0 registradas</span>
+                    </h3>
+
+                    <!-- Filtros da Agenda -->
+                    <div class="filter-bar">
+                        <div>
+                            <label style="font-size: 11px; font-weight: bold;">Pesquisa por Pessoa</label>
+                            <input type="text" id="buscaPessoa" placeholder="Filtrar por nome..." oninput="filtrarOitivas()">
+                        </div>
+                        <div>
+                            <label style="font-size: 11px; font-weight: bold;">Nº Ocorrência</label>
+                            <input type="number" id="buscaProc" placeholder="Número exato..." oninput="filtrarOitivas()">
+                        </div>
+                        <div>
+                            <label style="font-size: 11px; font-weight: bold;">Filtrar Status</label>
+                            <select id="buscaStatus" onchange="filtrarOitivas()">
+                                <option value="TODOS">TODOS</option>
+                                <option value="AGENDADA">AGENDADA</option>
+                                <option value="REALIZADA">REALIZADA</option>
+                                <option value="REMARCADA">REMARCADA</option>
+                                <option value="CANCELADA">CANCELADA</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Data/Hora</th>
+                                    <th>Envolvido/Depoente</th>
+                                    <th>Procedimento Investigativo</th>
+                                    <th>Responsável</th>
+                                    <th>Status</th>
+                                    <th class="col-acoes">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaCorpo">
+                                <!-- Preenchido dinamicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- SEÇÃO: CADASTRAR FUNCIONÁRIO (Apenas Policial) -->
+                <section id="sec-cadastrar-funcionario" class="content-section card">
+                    <h3>Novo Funcionário da Delegacia (FuncionarioDelegacia)</h3>
+                    
+                    <form id="formFuncionario" onsubmit="cadastrarFuncionarioSimulado(event)" style="max-width: 600px;">
+                        
+                        <div class="form-group">
+                            <label>Nome:</label>
+                            <input type="text" id="funcNome" required placeholder="Nome completo do servidor">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>CPF:</label>
+                            <input type="text" id="funcCpf" required placeholder="Ex: 000.000.000-00">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Login:</label>
+                            <input type="text" id="funcLogin" required placeholder="Defina o usuário de login">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Senha:</label>
+                            <input type="password" id="funcSenha" required placeholder="Defina a senha de acesso">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Cargo:</label>
+                            <select id="funcCargo">
+                                <option value="POLICIAL">POLICIAL</option>
+                                <option value="ESTAGIARIO">ESTAGIÁRIO</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary" style="margin-top: 15px;">[ CADASTRAR ]</button>
+                    </form>
+                </section>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- LOGICA DE SCRIPT DO SISTEMA -->
+    <script>
+        const API = 'http://localhost:8080';
+        let usuarioLogado = null;
+        let bancoOitivas = [];
+
+        // Lógica de Modais Customizados (Substitutos de Alert/Confirm)
+        let confirmAction = null;
+
+        function exibirNotificacao(mensagem, tipo = "success") {
+            const toast = document.getElementById('customToast');
+            toast.innerText = mensagem;
+            toast.style.backgroundColor = tipo === "error" ? "#e53e3e" : "#2b6cb0";
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+
+        function solicitarConfirmacao(mensagem, acao) {
+            document.getElementById('confirmMessage').innerText = mensagem;
+            document.getElementById('customConfirmModal').style.display = 'flex';
+            confirmAction = acao;
+        }
+
+        document.getElementById('btnConfirmCancel').addEventListener('click', () => {
+            document.getElementById('customConfirmModal').style.display = 'none';
+            confirmAction = null;
+        });
+
+        document.getElementById('btnConfirmOk').addEventListener('click', () => {
+            document.getElementById('customConfirmModal').style.display = 'none';
+            if (confirmAction) {
+                confirmAction();
+            }
+            confirmAction = null;
+        });
+
+        // ── LOGIN ──────────────────────────────────────────────
+        async function executarLogin() {
+            const login = document.getElementById('inputLogin').value.trim();
+            const senha = document.getElementById('inputSenha').value;
+            const erroDiv = document.getElementById('loginError');
+            erroDiv.style.display = 'none';
+
+            try {
+                const resp = await fetch(`${API}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ login, senha })
+                });
+                const dados = await resp.json();
+
+                if (dados.sucesso) {
+                    usuarioLogado = { nome: dados.nome, cargo: dados.cargo, login };
+
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('appScreen').style.display = 'flex';
+                    document.getElementById('lblUsuario').innerText = usuarioLogado.nome;
+                    document.getElementById('lblCargo').innerText = usuarioLogado.cargo;
+
+                    construirMenuLateral();
+                    await carregarOitivas();
+
+                    if (usuarioLogado.cargo === 'POLICIAL') {
+                        mudarAba('sec-cadastrar-oitiva');
+                    } else {
+                        mudarAba('sec-listar-oitivas');
+                    }
+
+                    document.getElementById('inputLogin').value = '';
+                    document.getElementById('inputSenha').value = '';
+                    exibirNotificacao("Bem-vindo(a) ao sistema!");
+                } else {
+                    erroDiv.style.display = 'block';
+                }
+            } catch (e) {
+                erroDiv.innerText = 'Erro ao conectar com o servidor Java.';
+                erroDiv.style.display = 'block';
+            }
+        }
+
+        function efetuarLogout() {
+            usuarioLogado = null;
+            bancoOitivas = [];
+            document.getElementById('appScreen').style.display = 'none';
+            document.getElementById('loginScreen').style.display = 'flex';
+            exibirNotificacao("Sessão finalizada com sucesso.");
+        }
+
+        function construirMenuLateral() {
+            const menu = document.getElementById('menuLateral');
+            menu.innerHTML = '';
+
+            if (usuarioLogado.cargo === 'POLICIAL') {
+                menu.innerHTML = `
+                    <li class="sidebar-item active" id="menu-sec-cadastrar-oitiva" onclick="mudarAba('sec-cadastrar-oitiva')">📝 Cadastrar Oitiva</li>
+                    <li class="sidebar-item" id="menu-sec-listar-oitivas" onclick="mudarAba('sec-listar-oitivas')">📋 Listar e Buscar</li>
+                    <li class="sidebar-item" id="menu-sec-cadastrar-funcionario" onclick="mudarAba('sec-cadastrar-funcionario')">👥 Cadastrar Funcionário</li>
+                `;
+            } else if (usuarioLogado.cargo === 'ESTAGIARIO') {
+                menu.innerHTML = `
+                    <li class="sidebar-item active" id="menu-sec-listar-oitivas" onclick="mudarAba('sec-listar-oitivas')">📋 Listar e Buscar</li>
+                `;
+            }
+        }
+
+        function mudarAba(secaoId) {
+            // Esconde todas as seções
+            document.querySelectorAll('.content-section').forEach(sec => {
+                sec.classList.remove('active');
+            });
+            // Tira active de todos os menus
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Ativa os corretos
+            document.getElementById(secaoId).classList.add('active');
+            const menuItem = document.getElementById('menu-' + secaoId);
+            if (menuItem) menuItem.classList.add('active');
+
+            // Recarrega tabelas se for a tela de listagem
+            if (secaoId === 'sec-listar-oitivas') {
+                renderizarTabela();
+            }
+        }
+
+        // ── OITIVAS ───────────────────────────────────────────
+        async function carregarOitivas() {
+            try {
+                const resp = await fetch(`${API}/oitivas`);
+                bancoOitivas = await resp.json();
+                renderizarTabela();
+            } catch (e) {
+                exibirNotificacao("Erro ao carregar oitivas do servidor.", "error");
+            }
+        }
+
+        async function cadastrarOitivaSimulada(event) {
+            event.preventDefault();
+
+            const corpo = {
+                nomeDepoente:   document.getElementById('nomeDepoente').value,
+                cpfDepoente:    document.getElementById('cpfDepoente').value,
+                tipoPessoa:     document.getElementById('tipoPessoa').value,
+                numOcorrencia:  parseInt(document.getElementById('numOcorrencia').value),
+                anoOcorrencia:  parseInt(document.getElementById('anoOcorrencia').value),
+                crime:          document.getElementById('crime').value,
+                dia:            parseInt(document.getElementById('dia').value),
+                mes:            parseInt(document.getElementById('mes').value),
+                ano:            parseInt(document.getElementById('ano').value),
+                hora:           parseInt(document.getElementById('hora').value),
+                minuto:         parseInt(document.getElementById('minuto').value),
+                observacao:     document.getElementById('observacao').value,
+                loginResponsavel: usuarioLogado.login
+            };
+
+            try {
+                const resp = await fetch(`${API}/oitivas`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(corpo)
+                });
+                const dados = await resp.json();
+                if (dados.sucesso) {
+                    document.getElementById('formOitiva').reset();
+                    document.getElementById('anoOcorrencia').value = "2026";
+                    document.getElementById('ano').value = "2026";
+                    document.getElementById('minuto').value = "00";
+                    await carregarOitivas();
+                    exibirNotificacao("Oitiva cadastrada com sucesso!");
+                    mudarAba('sec-listar-oitivas');
+                } else {
+                    exibirNotificacao("Erro: " + (dados.erro || "verifique os dados."), "error");
+                }
+            } catch (e) {
+                exibirNotificacao("Erro ao conectar com o servidor.", "error");
+            }
+        }
+
+        // ── FUNCIONÁRIOS ──────────────────────────────────────
+        async function cadastrarFuncionarioSimulado(event) {
+            event.preventDefault();
+
+            const corpo = {
+                nome:   document.getElementById('funcNome').value.trim(),
+                cpf:    document.getElementById('funcCpf').value.trim(),
+                login:  document.getElementById('funcLogin').value.trim(),
+                senha:  document.getElementById('funcSenha').value,
+                cargo:  document.getElementById('funcCargo').value
+            };
+
+            try {
+                const resp = await fetch(`${API}/funcionarios`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(corpo)
+                });
+                const dados = await resp.json();
+                if (dados.sucesso) {
+                    document.getElementById('formFuncionario').reset();
+                    exibirNotificacao("Funcionário " + corpo.nome + " cadastrado com sucesso!");
+                    mudarAba('sec-listar-oitivas');
+                } else {
+                    exibirNotificacao("Erro: " + (dados.erro || "verifique os dados."), "error");
+                }
+            } catch (e) {
+                exibirNotificacao("Erro ao conectar com o servidor.", "error");
+            }
+        }
+
+        async function removerOitivaSimulada(index) {
+            solicitarConfirmacao("Tem certeza que deseja remover esta oitiva do acervo de investigações?", async () => {
+                try {
+                    await fetch(`${API}/remover`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ indice: index })
+                    });
+                    await carregarOitivas();
+                    exibirNotificacao("Oitiva removida com sucesso.");
+                } catch (e) {
+                    exibirNotificacao("Erro ao remover oitiva.", "error");
+                }
+            });
+        }
+
+        async function alterarStatusSimulado(index, novoStatus) {
+            if (!novoStatus) return;
+            try {
+                await fetch(`${API}/status`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ indice: index, status: novoStatus })
+                });
+                await carregarOitivas();
+                exibirNotificacao("Status alterado para " + novoStatus + ".");
+            } catch (e) {
+                exibirNotificacao("Erro ao alterar status.", "error");
+            }
+        }
+
+        function renderizarTabela(dadosFiltrados = null) {
+            const listaParaExibir = dadosFiltrados || bancoOitivas;
+            const corpo = document.getElementById('tabelaCorpo');
+            corpo.innerHTML = '';
+
+            document.getElementById('totalBadge').innerText = `${bancoOitivas.length} registradas`;
+
+            if(listaParaExibir.length === 0) {
+                corpo.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#718096; padding: 30px;">Nenhuma oitiva localizada com os filtros atuais.</td></tr>`;
+                return;
+            }
+
+            listaParaExibir.forEach((oitiva) => {
+                const indexReal = oitiva.indice;
+                const minFormatado = String(oitiva.minuto).padStart(2, '0');
+                const dataHoraStr = `${oitiva.dia}/${oitiva.mes}/${oitiva.ano} às ${oitiva.hora}h${minFormatado}`;
+
+                let colunaAcoesHtml = '';
+                if (usuarioLogado && usuarioLogado.cargo === 'POLICIAL') {
+                    colunaAcoesHtml = `
+                        <button class="btn-action btn-delete" onclick="removerOitivaSimulada(${indexReal})">Remover</button>
+                        <select class="select-status-inline" onchange="alterarStatusSimulado(${indexReal}, this.value)">
+                            <option value="">-- Mudar Status --</option>
+                            <option value="AGENDADA">AGENDADA</option>
+                            <option value="REALIZADA">REALIZADA</option>
+                            <option value="REMARCADA">REMARCADA</option>
+                            <option value="CANCELADA">CANCELADA</option>
+                        </select>
+                    `;
+                } else {
+                    colunaAcoesHtml = `<span style="font-size:0.8rem; color:#a0aec0; font-style:italic;">Sem permissão</span>`;
+                }
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${dataHoraStr}</strong></td>
+                    <td>
+                        <div><strong>${oitiva.nomeDepoente}</strong></div>
+                        <div style="font-size:0.8rem; color:#718096;">CPF: ${oitiva.cpfDepoente}</div>
+                        <span class="badge-tipo">${oitiva.tipoPessoa}</span>
+                    </td>
+                    <td>
+                        <div>Proc: <strong>${String(oitiva.numOcorrencia).padStart(3, '0')}/${oitiva.anoOcorrencia}</strong></div>
+                        <div style="font-size:0.8rem; color:#4a5568;">Crime: ${oitiva.crime}</div>
+                        ${oitiva.observacao ? `<div style="font-size:0.75rem; color:#a0aec0; margin-top:4px;">Obs: ${oitiva.observacao}</div>` : ''}
+                    </td>
+                    <td>${oitiva.funcionarioResponsavel}</td>
+                    <td><span class="badge-status status-${oitiva.status}">${oitiva.status}</span></td>
+                    <td class="col-acoes">${colunaAcoesHtml}</td>
+                `;
+                corpo.appendChild(tr);
+            });
+
+            // Oculta completamente a coluna de ações se for estagiário
+            const colAcoesElementos = document.querySelectorAll('.col-acoes');
+            colAcoesElementos.forEach(el => {
+                el.style.display = (usuarioLogado && usuarioLogado.cargo === 'ESTAGIARIO') ? 'none' : 'table-cell';
+            });
+        }
+
+        function filtrarOitivas() {
+            const txtPessoa = document.getElementById('buscaPessoa').value.toLowerCase();
+            const txtProc = document.getElementById('buscaProc').value;
+            const selStatus = document.getElementById('buscaStatus').value;
+
+            const resultado = bancoOitivas.filter(oitiva => {
+                const batePessoa = oitiva.nomeDepoente.toLowerCase().includes(txtPessoa);
+                const bateProc = txtProc === '' || oitiva.numOcorrencia === parseInt(txtProc);
+                const bateStatus = selStatus === 'TODOS' || oitiva.status === selStatus;
+
+                return batePessoa && bateProc && bateStatus;
+            });
+
+            renderizarTabela(resultado);
+        }
+    </script>
+</body>
+</html>

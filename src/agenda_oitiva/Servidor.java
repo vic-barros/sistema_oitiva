@@ -5,6 +5,7 @@ import com.sun.net.httpserver.*;
 import agenda_oitiva.dao.DepoenteDAO;
 import agenda_oitiva.dao.FuncionarioDAO;
 import agenda_oitiva.dao.OitivaDAO;
+import agenda_oitiva.model.CargoFuncional;
 import agenda_oitiva.model.Depoente;
 import agenda_oitiva.model.FuncionarioDelegacia;
 import agenda_oitiva.model.Oitiva;
@@ -29,6 +30,7 @@ public class Servidor {
         server.createContext("/oitivas", this::handleOitivas);
         server.createContext("/status", this::handleStatus);
         server.createContext("/remover", this::handleRemover);
+        server.createContext("/funcionarios", this::handleFuncionarios);
 
         server.setExecutor(null);
         server.start();
@@ -82,7 +84,7 @@ public class Servidor {
             "\"indice\":" + indice + "," +
             "\"idOitiva\":" + o.getIdOitiva() + "," +
             "\"nomeDepoente\":\"" + o.getPessoaIntimada().getNome() + "\"," +
-            "\"cpfDepoente\":\"" + o.getPessoaIntimada().getCpf() + "\"," +
+            "\"cpfDepoente\":\"" + (o.getPessoaIntimada().getCpf() != null ? o.getPessoaIntimada().getCpf() : "") + "\"," +
             "\"tipoPessoa\":\"" + o.getPessoaIntimada().getTipoDePessoa() + "\"," +
             "\"numOcorrencia\":" + o.getProcedimento().getNumeroOcorrencia() + "," +
             "\"anoOcorrencia\":" + o.getProcedimento().getAnoOcorrencia() + "," +
@@ -156,7 +158,11 @@ public class Servidor {
                 String loginResp    = extrairCampo(corpo, "loginResponsavel");
 
                 TipoPessoa tipo = TipoPessoa.valueOf(tipoStr);
-                Depoente depoente = new Depoente(nomeDepoente, cpfDepoente, tipo);
+                Depoente depoente = new Depoente(
+                    nomeDepoente,
+                    cpfDepoente.isBlank() ? null : cpfDepoente,
+                    tipo
+                );
                 ProcedimentoPolicial proc = new ProcedimentoPolicial(numOc, anoOc, crime);
                 FuncionarioDelegacia resp = funcionarioDAO.buscarPorLogin(loginResp);
 
@@ -175,13 +181,12 @@ public class Servidor {
             return;
         }
         String corpo = lerCorpo(ex);
-        int idOitiva = Integer.parseInt(extrairCampo(corpo, "indice"));
+        int indice = Integer.parseInt(extrairCampo(corpo, "indice"));
         String novoStatus = extrairCampo(corpo, "status");
 
-        // busca o id real da oitiva
         ArrayList<Oitiva> lista = oitivaDAO.listarTodas();
-        if (idOitiva >= 0 && idOitiva < lista.size()) {
-            int idReal = lista.get(idOitiva).getIdOitiva();
+        if (indice >= 0 && indice < lista.size()) {
+            int idReal = lista.get(indice).getIdOitiva();
             oitivaDAO.alterarStatus(idReal, StatusOitiva.valueOf(novoStatus));
         }
         enviarResposta(ex, 200, "{\"sucesso\":true}");
@@ -195,12 +200,44 @@ public class Servidor {
         String corpo = lerCorpo(ex);
         int indice = Integer.parseInt(extrairCampo(corpo, "indice"));
 
-        // busca o id real da oitiva pelo indice
         ArrayList<Oitiva> lista = oitivaDAO.listarTodas();
         if (indice >= 0 && indice < lista.size()) {
             int idReal = lista.get(indice).getIdOitiva();
             oitivaDAO.remover(idReal);
         }
         enviarResposta(ex, 200, "{\"sucesso\":true}");
+    }
+
+    private void handleFuncionarios(HttpExchange ex) throws IOException {
+        if (ex.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
+            enviarResposta(ex, 204, "");
+            return;
+        }
+
+        if (ex.getRequestMethod().equalsIgnoreCase("POST")) {
+            String corpo = lerCorpo(ex);
+            try {
+                String nome  = extrairCampo(corpo, "nome");
+                String cpf   = extrairCampo(corpo, "cpf");
+                String login = extrairCampo(corpo, "login");
+                String senha = extrairCampo(corpo, "senha");
+                String cargoStr = extrairCampo(corpo, "cargo");
+
+                if (funcionarioDAO.buscarPorLogin(login) != null) {
+                    enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"Login ja cadastrado!\"}");
+                    return;
+                }
+
+                CargoFuncional cargo = CargoFuncional.valueOf(cargoStr);
+                FuncionarioDelegacia novoFuncionario = new FuncionarioDelegacia(
+                    nome, cpf.isBlank() ? null : cpf, cargo, login, senha
+                );
+                funcionarioDAO.inserir(novoFuncionario);
+
+                enviarResposta(ex, 200, "{\"sucesso\":true}");
+            } catch (Exception e) {
+                enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + e.getMessage() + "\"}");
+            }
+        }
     }
 }

@@ -18,7 +18,6 @@ public abstract class Pessoa {
         setCpf(cpf);
     }
 
-    // 1. ADICIONADO: Getter e Setter para o ID
     public int getIdPessoa() {
         return idPessoa;
     }
@@ -44,6 +43,11 @@ public abstract class Pessoa {
     }
 
     public void setCpf(String cpfSujo) {
+    	
+    	if(cpfSujo == null || cpfSujo.isBlank()) {
+    		this.cpf = null;
+    		return;
+    	}
         String cpfLimpo = cpfSujo.replaceAll("\\D", "");
         
         if(cpfLimpo.length() != 11) {

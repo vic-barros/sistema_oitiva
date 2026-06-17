@@ -7,8 +7,17 @@ public class FuncionarioDelegacia extends Pessoa {
     private String login;
     private String senhaHash;
 
- // Construtor para uso do DAO — recebe hash já pronto
-    public FuncionarioDelegacia(String nome, String cpf, CargoFuncional cargo, 
+    // Construtor normal — recebe senha pura e gera hash
+    public FuncionarioDelegacia(String nome, String cpf, CargoFuncional cargo,
+                                 String login, String senha) {
+        super(nome, cpf);
+        this.cargo = cargo;
+        this.login = login;
+        this.senhaHash = gerarHash(senha);
+    }
+
+    // Construtor para uso do DAO — recebe hash já pronto
+    public FuncionarioDelegacia(String nome, String cpf, CargoFuncional cargo,
                                  String login, String senhaHash, boolean jaEhHash) {
         super(nome, cpf);
         this.cargo = cargo;

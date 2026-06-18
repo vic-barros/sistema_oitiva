@@ -94,56 +94,56 @@ git clone https://github.com/seu-usuario/sistema-oitivas.git
 Execute o script abaixo no pgAdmin ou psql:
 
 ```sql
-CREATE TYPE tipo_pessoa AS ENUM('VITIMA', 'SUSPEITO', 'TESTEMUNHA');
-CREATE TYPE cargo_funcional AS ENUM('POLICIAL', 'ESTAGIARIO');
-CREATE TYPE status_oitiva AS ENUM('PENDENTE', 'AGENDADA', 'REMARCADA', 'CANCELADA', 'REALIZADA');
 
-CREATE TABLE pessoa (
+CREATE TYPE public.cargo_funcional AS ENUM ('POLICIAL', 'ESTAGIARIO');
+CREATE TYPE public.status_oitiva AS ENUM ('PENDENTE', 'AGENDADA', 'REMARCADA', 'CANCELADA', 'REALIZADA');
+CREATE TYPE public.tipo_pessoa AS ENUM ('VITIMA', 'SUSPEITO', 'TESTEMUNHA');
+
+CREATE TABLE public.pessoa (
     id_pessoa SERIAL PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
-    cpf CHAR(11) NOT NULL UNIQUE
+    cpf CHARACTER(11) UNIQUE NULLS NOT DISTINCT
 );
 
-CREATE TABLE depoente (
+
+CREATE TABLE public.depoente (
     id_depoente SERIAL PRIMARY KEY,
-    id_pessoa INT NOT NULL REFERENCES pessoa(id_pessoa),
-    tipo_pessoa tipo_pessoa NOT NULL
+    id_pessoa INTEGER NOT NULL,
+    tipo_pessoa public.tipo_pessoa NOT NULL,
+    FOREIGN KEY (id_pessoa) REFERENCES public.pessoa(id_pessoa)
 );
 
-CREATE TABLE funcionario (
+
+CREATE TABLE public.funcionario (
     id_funcionario SERIAL PRIMARY KEY,
-    id_pessoa INT NOT NULL REFERENCES pessoa(id_pessoa),
+    id_pessoa INTEGER NOT NULL,
     login VARCHAR(30) NOT NULL,
-    senha_hash CHAR(64) NOT NULL,
-    cargo cargo_funcional NOT NULL
+    senha_hash CHARACTER(64) NOT NULL,
+    cargo public.cargo_funcional NOT NULL,
+    FOREIGN KEY (id_pessoa) REFERENCES public.pessoa(id_pessoa)
 );
 
-CREATE TABLE procedimento (
+
+CREATE TABLE public.procedimento (
     id_procedimento SERIAL PRIMARY KEY,
-    num_ocorrencia INT NOT NULL,
-    ano_ocorrencia INT NOT NULL,
+    num_ocorrencia INTEGER NOT NULL,
+    ano_ocorrencia INTEGER NOT NULL,
     crime VARCHAR(50)
 );
 
-CREATE TABLE oitiva (
+
+CREATE TABLE public.oitiva (
     id_oitiva SERIAL PRIMARY KEY,
-    id_depoente INT NOT NULL REFERENCES depoente(id_depoente),
-    id_procedimento INT NOT NULL REFERENCES procedimento(id_procedimento),
-    id_funcionario INT NOT NULL REFERENCES funcionario(id_funcionario),
-    data_hora TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    status status_oitiva NOT NULL DEFAULT 'PENDENTE',
-    observacao TEXT
+    id_depoente INTEGER NOT NULL,
+    id_procedimento INTEGER NOT NULL,
+    id_funcionario INTEGER NOT NULL,
+    data_hora TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
+    status public.status_oitiva DEFAULT 'PENDENTE'::public.status_oitiva NOT NULL,
+    observacao TEXT,
+    FOREIGN KEY (id_depoente) REFERENCES public.depoente(id_depoente),
+    FOREIGN KEY (id_funcionario) REFERENCES public.funcionario(id_funcionario),
+    FOREIGN KEY (id_procedimento) REFERENCES public.procedimento(id_procedimento)
 );
-```
-
-### 3. Configurar a conexão
-Edite o arquivo `ConexaoBD.java` com suas credenciais:
-
-```java
-private static final String URL = "jdbc:postgresql://localhost:5432/nome_do_banco";
-private static final String USUARIO = "postgres";
-private static final String SENHA = "sua_senha";
-```
 
 ### 4. Adicionar o driver JDBC
 - Baixe em [jdbc.postgresql.org](https://jdbc.postgresql.org/download/)

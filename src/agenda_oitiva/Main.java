@@ -21,7 +21,7 @@ public class Main {
         // Cadastra funcionários no banco se ainda não existirem
         if (funcionarioDAO.buscarPorLogin("admin") == null) {
             FuncionarioDelegacia f1 = new FuncionarioDelegacia(
-                "Laíssa Barros", "529.982.247-25",
+                "Laíssa Barros", "011.446.784-63",
                 CargoFuncional.POLICIAL, "admin", "admin", false
             );
             funcionarioDAO.inserir(f1);
@@ -30,7 +30,7 @@ public class Main {
 
         if (funcionarioDAO.buscarPorLogin("estagiario") == null) {
             FuncionarioDelegacia f2 = new FuncionarioDelegacia(
-                "Jenisson Nascimento", "057.465.365-12",
+                "Jenisson Nascimento", "222.333.444-05",
                 CargoFuncional.ESTAGIARIO, "estagiario", "estagiario", false
             );
             funcionarioDAO.inserir(f2);

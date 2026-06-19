@@ -202,6 +202,22 @@
             box-shadow: 0 0 0 3px rgba(49,130,206,0.15); 
         }
         
+        /* Estilização para as caixinhas de marcação (Checkboxes) */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+            font-size: 0.85rem;
+            color: #4a5568;
+            cursor: pointer;
+        }
+
+        .checkbox-group input {
+            width: auto;
+            cursor: pointer;
+        }
+        
         .inline-fields { 
             display: grid; 
             grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); 
@@ -453,10 +469,8 @@
 </head>
 <body>
 
-    <!-- Notificação Flutuante -->
     <div id="customToast">Mensagem aqui</div>
 
-    <!-- Caixa de Confirmação customizada -->
     <div id="customConfirmModal">
         <div class="confirm-card">
             <h4 class="confirm-title">Confirmar Ação</h4>
@@ -468,7 +482,6 @@
         </div>
     </div>
 
-    <!-- Tela de Login -->
     <div class="login-screen" id="loginScreen">
         <div class="login-card">
             <h2>SISTEMA OITIVAS</h2>
@@ -480,9 +493,12 @@
                 <label>Login</label>
                 <input type="text" id="inputLogin" placeholder="Ex: admin" required>
             </div>
-            <div class="form-group" style="margin-bottom: 25px;">
+            <div class="form-group" style="margin-bottom: 15px;">
                 <label>Senha</label>
                 <input type="password" id="inputSenha" placeholder="••••••••" required>
+                <label class="checkbox-group">
+                    <input type="checkbox" onchange="toggleMostrarSenha('inputSenha')"> Mostrar senha
+                </label>
             </div>
             <button class="btn-primary" onclick="executarLogin()">Acessar Sistema</button>
             
@@ -494,7 +510,6 @@
         </div>
     </div>
 
-    <!-- Estrutura Principal -->
     <div class="app-screen" id="appScreen">
         <header>
             <div class="title">POLÍCIA CIVIL - AGENDAMENTO DE OITIVAS</div>
@@ -508,17 +523,13 @@
 
         <div class="main-container">
             
-            <!-- MENU LATERAL RESPONSIVO -->
             <aside class="sidebar">
                 <ul class="sidebar-menu" id="menuLateral">
-                    <!-- Gerado dinamicamente via JS de acordo com o nível de acesso -->
-                </ul>
+                    </ul>
             </aside>
 
-            <!-- CONTEÚDO DINÂMICO -->
             <div class="content-area">
                 
-                <!-- SEÇÃO: CADASTRAR OITIVA (Apenas Policial) -->
                 <section id="sec-cadastrar-oitiva" class="content-section card">
                     <h3>1. Cadastrar Nova Oitiva</h3>
                     <form id="formOitiva" onsubmit="cadastrarOitivaSimulada(event)">
@@ -530,6 +541,9 @@
                             <div class="form-group">
                                 <label>CPF do Depoente</label>
                                 <input type="text" id="cpfDepoente" placeholder="Opcional - Ex: 000.000.000-00">
+                                <label class="checkbox-group">
+                                    <input type="checkbox" id="chkNaoTemCpf" onchange="toggleCpfOpcional()"> Depoente não possui CPF
+                                </label>
                             </div>
                         </div>
                         
@@ -542,15 +556,14 @@
                             </select>
                         </div>
 
-                        <!-- Procedimento Policial -->
                         <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #e2e8f0; display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 15px;">
                             <div class="form-group">
                                 <label>Nº Ocorrência</label>
-                                <input type="number" id="numOcorrencia" min="1" required placeholder="Nº">
+                                <input type="number" id="numOcorrência" min="1" required placeholder="Nº">
                             </div>
                             <div class="form-group">
                                 <label>Ano Ocorrência</label>
-                                <input type="number" id="anoOcorrencia" value="2026" min="1980" max="2026" required>
+                                <input type="number" id="anoOcorrência" value="2026" min="1980" max="2026" required>
                             </div>
                             <div class="form-group">
                                 <label>Crime Investigado</label>
@@ -558,7 +571,6 @@
                             </div>
                         </div>
 
-                        <!-- Data e Horário -->
                         <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #e2e8f0;">
                             <label style="font-weight: bold; margin-bottom: 10px; font-size: 0.85rem; color: #4a5568;">DATA E HORÁRIO</label>
                             <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">
@@ -594,14 +606,12 @@
                     </form>
                 </section>
 
-                <!-- SEÇÃO: LISTAR & BUSCAR OITIVAS -->
                 <section id="sec-listar-oitivas" class="content-section card">
                     <h3>
                         <span>Acervo Geral de Oitivas</span>
                         <span id="totalBadge" style="font-size: 0.85rem; background: var(--primary-color); color: white; padding: 2px 8px; border-radius: 10px;">0 registradas</span>
                     </h3>
 
-                    <!-- Filtros da Agenda -->
                     <div class="filter-bar">
                         <div>
                             <label style="font-size: 11px; font-weight: bold;">Pesquisa por Pessoa</label>
@@ -636,15 +646,13 @@
                                 </tr>
                             </thead>
                             <tbody id="tabelaCorpo">
-                                <!-- Preenchido dinamicamente -->
-                            </tbody>
+                                </tbody>
                         </table>
                     </div>
                 </section>
 
-                <!-- SEÇÃO: CADASTRAR FUNCIONÁRIO (Apenas Policial) -->
                 <section id="sec-cadastrar-funcionario" class="content-section card">
-                    <h3>Novo Funcionário da Delegacia (FuncionarioDelegacia)</h3>
+                    <h3>Novo Funcionário da Delegacia</h3>
                     
                     <form id="formFuncionario" onsubmit="cadastrarFuncionarioSimulado(event)" style="max-width: 600px;">
                         
@@ -663,9 +671,12 @@
                             <input type="text" id="funcLogin" required placeholder="Defina o usuário de login">
                         </div>
                         
-                        <div class="form-group">
+                        <div class="form-group" style="margin-bottom: 15px;">
                             <label>Senha:</label>
                             <input type="password" id="funcSenha" required placeholder="Defina a senha de acesso">
+                            <label class="checkbox-group">
+                                <input type="checkbox" onchange="toggleMostrarSenha('funcSenha')"> Mostrar senha
+                            </label>
                         </div>
                         
                         <div class="form-group">
@@ -684,18 +695,42 @@
         </div>
     </div>
 
-    <!-- LOGICA DE SCRIPT DO SISTEMA -->
     <script>
         const API = 'http://localhost:8080';
         let usuarioLogado = null;
         let bancoOitivas = [];
-
-        // Lógica de Modais Customizados (Substitutos de Alert/Confirm)
         let confirmAction = null;
 
+        // Função para Alternar a Visibilidade da Senha
+        function toggleMostrarSenha(inputId) {
+            const input = document.getElementById(inputId);
+            if (input.type === "password") {
+                input.type = "text";
+            } else {
+                input.type = "password";
+            }
+        }
+
+        // Função para controlar o campo CPF quando não houver número disponível
+        function toggleCpfOpcional() {
+            const checkBox = document.getElementById('chkNaoTemCpf');
+            const inputCpf = document.getElementById('cpfDepoente');
+            
+            if (checkBox.checked) {
+                inputCpf.value = "Não informado";
+                inputCpf.disabled = true;
+                inputCpf.style.backgroundColor = "#e2e8f0";
+            } else {
+                inputCpf.value = "";
+                inputCpf.disabled = false;
+                inputCpf.style.backgroundColor = "#fff";
+            }
+        }
+
+        // LINHA 420 CORRIGIDA: Removida atribuição duplicada que quebrava o script
         function exibirNotificacao(mensagem, tipo = "success") {
             const toast = document.getElementById('customToast');
-            toast.innerText = mensagem;
+            toast.innerText = mensagem; 
             toast.style.backgroundColor = tipo === "error" ? "#e53e3e" : "#2b6cb0";
             toast.style.display = 'block';
             setTimeout(() => {
@@ -792,21 +827,17 @@
         }
 
         function mudarAba(secaoId) {
-            // Esconde todas as seções
             document.querySelectorAll('.content-section').forEach(sec => {
                 sec.classList.remove('active');
             });
-            // Tira active de todos os menus
             document.querySelectorAll('.sidebar-item').forEach(item => {
                 item.classList.remove('active');
             });
 
-            // Ativa os corretos
             document.getElementById(secaoId).classList.add('active');
             const menuItem = document.getElementById('menu-' + secaoId);
             if (menuItem) menuItem.classList.add('active');
 
-            // Recarrega tabelas se for a tela de listagem
             if (secaoId === 'sec-listar-oitivas') {
                 renderizarTabela();
             }
@@ -830,8 +861,8 @@
                 nomeDepoente:   document.getElementById('nomeDepoente').value,
                 cpfDepoente:    document.getElementById('cpfDepoente').value,
                 tipoPessoa:     document.getElementById('tipoPessoa').value,
-                numOcorrencia:  parseInt(document.getElementById('numOcorrencia').value),
-                anoOcorrencia:  parseInt(document.getElementById('anoOcorrencia').value),
+                numOcorrencia:  parseInt(document.getElementById('numOcorrência').value),
+                anoOcorrencia:  parseInt(document.getElementById('anoOcorrência').value),
                 crime:          document.getElementById('crime').value,
                 dia:            parseInt(document.getElementById('dia').value),
                 mes:            parseInt(document.getElementById('mes').value),
@@ -851,7 +882,10 @@
                 const dados = await resp.json();
                 if (dados.sucesso) {
                     document.getElementById('formOitiva').reset();
-                    document.getElementById('anoOcorrencia').value = "2026";
+                    document.getElementById('cpfDepoente').disabled = false;
+                    document.getElementById('cpfDepoente').style.backgroundColor = "#fff";
+                    
+                    document.getElementById('anoOcorrência').value = "2026";
                     document.getElementById('ano').value = "2026";
                     document.getElementById('minuto').value = "00";
                     await carregarOitivas();
@@ -980,7 +1014,6 @@
                 corpo.appendChild(tr);
             });
 
-            // Oculta completamente a coluna de ações se for estagiário
             const colAcoesElementos = document.querySelectorAll('.col-acoes');
             colAcoesElementos.forEach(el => {
                 el.style.display = (usuarioLogado && usuarioLogado.cargo === 'ESTAGIARIO') ? 'none' : 'table-cell';

@@ -44,11 +44,16 @@ public abstract class Pessoa {
 
     public void setCpf(String cpfSujo) {
     	
-    	if(cpfSujo == null || cpfSujo.isBlank()) {
+    	if(cpfSujo == null) {
     		this.cpf = null;
     		return;
     	}
         String cpfLimpo = cpfSujo.replaceAll("\\D", "");
+        
+        if(cpfLimpo.isEmpty()){
+        	this.cpf = null;
+        	return;
+        }
         
         if(cpfLimpo.length() != 11) {
             throw new IllegalArgumentException("Tamanho de CPF Inválido!");

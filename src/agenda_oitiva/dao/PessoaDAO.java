@@ -9,9 +9,7 @@ import agenda_oitiva.model.Pessoa;
 
 public class PessoaDAO {
 
-    /**
-     * Insere uma nova pessoa no banco e retorna o id gerado.
-     */
+
     public int inserir(Pessoa pessoa) {
         String sql = "INSERT INTO pessoa (nome, cpf) " +
                      "VALUES (?, ?) RETURNING id_pessoa";
@@ -33,9 +31,7 @@ public class PessoaDAO {
         return -1;
     }
 
-    /**
-     * Verifica se já existe uma pessoa com aquele CPF no banco.
-     */
+    
     public boolean existePorCpf(String cpf) {
         String sql = "SELECT id_pessoa FROM pessoa WHERE cpf = ?";
 
@@ -52,10 +48,7 @@ public class PessoaDAO {
         }
     }
 
-    /**
-     * Busca o id de uma pessoa pelo CPF.
-     * Útil para evitar duplicatas antes de inserir.
-     */
+    
     public int buscarIdPorCpf(String cpf) {
         String sql = "SELECT id_pessoa FROM pessoa WHERE cpf = ?";
 

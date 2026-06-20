@@ -18,7 +18,7 @@ public class Main {
         FuncionarioDAO funcionarioDAO = new FuncionarioDAO();
         OitivaDAO oitivaDAO = new OitivaDAO();
 
-        // Cadastra funcionários no banco se ainda não existirem
+       
         if (funcionarioDAO.buscarPorLogin("admin") == null) {
             FuncionarioDelegacia f1 = new FuncionarioDelegacia(
                 "Laíssa Barros", "011.446.784-63",
@@ -37,7 +37,7 @@ public class Main {
             System.out.println("Funcionário estagiario cadastrado no banco!");
         }
 
-        // Inicia o servidor HTTP
+       
         try {
             Servidor servidor = new Servidor();
             servidor.iniciar();
@@ -45,7 +45,7 @@ public class Main {
             System.out.println("Erro ao iniciar servidor: " + e.getMessage());
         }
 
-        // Menu console
+    
         Scanner sc = new Scanner(System.in);
         System.out.println("=== SISTEMA DE OITIVAS ===");
         System.out.print("Login: ");

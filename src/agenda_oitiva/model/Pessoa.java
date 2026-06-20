@@ -3,13 +3,13 @@ import java.util.Objects;
 
 public abstract class Pessoa {
 
-    private int idPessoa; // 1. ADICIONADO: Atributo para bater com a PK do seu DER
+    private int idPessoa; 
     private String nome;
     private String cpf;
     
     public abstract TipoPessoa getTipoDePessoa();
     
-    // 2. ADICIONADO: Construtor vazio necessário para o DAO instanciar as classes filhas
+ 
     public Pessoa() {
     }
     

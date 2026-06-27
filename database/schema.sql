@@ -1,8 +1,8 @@
 CREATE TYPE public.cargo_funcional AS ENUM ('POLICIAL', 'ESTAGIARIO');
 CREATE TYPE public.status_oitiva AS ENUM ('PENDENTE', 'AGENDADA', 'REMARCADA', 'CANCELADA', 'REALIZADA');
 CREATE TYPE public.tipo_pessoa AS ENUM ('VITIMA', 'SUSPEITO', 'TESTEMUNHA');
-CREATE TYPE public.status_cadastro_enum AS ENUM ('pendente', 'aprovado', 'recusado');
-CREATE TYPE public.status_repasse AS ENUM ('pendente', 'confirmado', 'recusado');
+CREATE TYPE public.status_cadastro_enum AS ENUM ('PENDENTE', 'APROVADO', 'RECUSADO');
+CREATE TYPE public.status_repasse AS ENUM ('PENDENTE', 'CONFIRMADO', 'RECUSADO');
 
 CREATE TABLE public.pessoa (
     id_pessoa SERIAL PRIMARY KEY,

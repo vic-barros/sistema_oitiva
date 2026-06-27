@@ -1,13 +1,7 @@
 package agenda_oitiva;
-import java.util.Scanner;
 import agenda_oitiva.dao.FuncionarioDAO;
 import agenda_oitiva.model.CargoFuncional;
 import agenda_oitiva.model.FuncionarioDelegacia;
-import agenda_oitiva.model.StatusOitiva;
-import agenda_oitiva.model.TipoPessoa;
-import agenda_oitiva.model.Depoente;
-import agenda_oitiva.model.Oitiva;
-import agenda_oitiva.model.ProcedimentoPolicial;
 import agenda_oitiva.dao.OitivaDAO;
 public class Main {
     public static void main(String[] args) {

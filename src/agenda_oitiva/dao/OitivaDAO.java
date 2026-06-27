@@ -73,13 +73,11 @@ public class OitivaDAO {
                     rs.getString("crime")
                 );
 
-                FuncionarioDelegacia funcionario = new FuncionarioDelegacia(
-                    rs.getString("nome_funcionario"),
-                    rs.getString("cpf_funcionario"),
-                    CargoFuncional.valueOf(rs.getString("cargo")),
-                    rs.getString("login"),
-                    "HASH:" + rs.getString("login"), false
-                );
+                FuncionarioDelegacia funcionario = new FuncionarioDelegacia();
+                funcionario.setNome(rs.getString("nome_funcionario"));
+                funcionario.setCpf(rs.getString("cpf_funcionario"));
+                funcionario.setCargo(CargoFuncional.valueOf(rs.getString("cargo")));
+                funcionario.setLogin(rs.getString("login"));
 
                 Oitiva oitiva = new Oitiva(
                     depoente, proc, funcionario,
@@ -210,13 +208,11 @@ public class OitivaDAO {
             rs.getString("crime")
         );
 
-        FuncionarioDelegacia funcionario = new FuncionarioDelegacia(
-            rs.getString("nome_funcionario"),
-            rs.getString("cpf_funcionario"),
-            CargoFuncional.valueOf(rs.getString("cargo")),
-            rs.getString("login"),
-            "HASH:" + rs.getString("login"), false
-        );
+        FuncionarioDelegacia funcionario = new FuncionarioDelegacia();
+        funcionario.setNome(rs.getString("nome_funcionario"));
+        funcionario.setCpf(rs.getString("cpf_funcionario"));
+        funcionario.setCargo(CargoFuncional.valueOf(rs.getString("cargo")));
+        funcionario.setLogin(rs.getString("login"));
 
         Oitiva oitiva = new Oitiva(
             depoente, proc, funcionario,

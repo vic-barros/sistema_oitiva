@@ -10,6 +10,7 @@ import agenda_oitiva.model.Depoente;
 import agenda_oitiva.model.FuncionarioDelegacia;
 import agenda_oitiva.model.Oitiva;
 import agenda_oitiva.model.ProcedimentoPolicial;
+import agenda_oitiva.model.StatusCadastro;
 import agenda_oitiva.model.StatusOitiva;
 import agenda_oitiva.model.TipoPessoa;
 
@@ -115,6 +116,10 @@ public class Servidor {
         FuncionarioDelegacia f = funcionarioDAO.buscarPorLogin(login);
 
         if (f != null && f.verificarSenha(senha)) {
+            if (f.getStatusCadastro() != StatusCadastro.APROVADO) {
+                enviarResposta(ex, 403, "{\"sucesso\":false,\"erro\":\"Cadastro ainda nao foi aprovado\"}");
+                return;
+            }
             String json = "{\"sucesso\":true,\"nome\":\"" + f.getNome()
                     + "\",\"cargo\":\"" + f.getCargo()
                     + "\",\"login\":\"" + f.getLogin() + "\"}";

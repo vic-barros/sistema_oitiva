@@ -8,6 +8,7 @@ public class FuncionarioDelegacia extends Pessoa {
 	private String senhaHash;
 	private boolean isAdmin;
 	private StatusCadastro statusCadastro;
+	private int idFuncionario;
 
 	// Construtor normal — recebe senha pura e gera hash (servirá para o banco)
 	public FuncionarioDelegacia(String nome, String cpf, CargoFuncional cargo, String login, String senha) {
@@ -21,14 +22,16 @@ public class FuncionarioDelegacia extends Pessoa {
 
 	// Construtor para uso do DAO — recebe hash já pronto (recebem os valores reais
 	// do banco)
-	public FuncionarioDelegacia(String nome, String cpf, CargoFuncional cargo, String login, String senhaHash,
-			boolean isAdmin, StatusCadastro statusCadastro) {
-		super(nome, cpf);
-		this.cargo = cargo;
-		this.login = login;
-		this.senhaHash = senhaHash;
-		this.isAdmin = isAdmin;
-		this.statusCadastro = statusCadastro;
+	public FuncionarioDelegacia(int idFuncionario, String nome, String cpf, CargoFuncional cargo, String login,
+	        String senhaHash, boolean isAdmin, StatusCadastro statusCadastro) {
+	    super(nome, cpf);
+	    this.idFuncionario = idFuncionario;
+	    this.cargo = cargo;
+	    this.login = login;
+	    this.senhaHash = senhaHash;
+	    this.isAdmin = isAdmin;
+	    this.statusCadastro = statusCadastro;
+	}
 	}
 
 	public FuncionarioDelegacia() {
@@ -96,6 +99,10 @@ public class FuncionarioDelegacia extends Pessoa {
 
 	public void setStatusCadastro(StatusCadastro statusCadastro) {
 		this.statusCadastro = statusCadastro;
+	}
+	
+	public int getIdFuncionario() {
+	    return idFuncionario;
 	}
 
 	@Override

@@ -16,8 +16,7 @@ public class Repasse {
 	private String observacao;
 
 	public Repasse(ProcedimentoPolicial procedimento, FuncionarioDelegacia funcionarioOrigem,
-			FuncionarioDelegacia funcionarioDestino, LocalDateTime dataSolicitação, LocalDateTime dataConfirmacao,
-			StatusRepasse status, String observacao) {
+			FuncionarioDelegacia funcionarioDestino, String observacao) {
 		this.procedimento = procedimento;
 		this.funcionarioOrigem = funcionarioOrigem;
 		this.funcionarioDestino = funcionarioDestino;
@@ -25,7 +24,6 @@ public class Repasse {
 		this.dataConfirmacao = null;
 		this.status = StatusRepasse.PENDENTE;
 		this.observacao = observacao;
-
 	}
 
 	// Construtor para reconstrução via DAO — todos os dados já existem no banco
@@ -45,10 +43,6 @@ public class Repasse {
 
 	public int getIdRepasse() {
 		return idRepasse;
-	}
-
-	public void setIdRepasse(int idRepasse) {
-		this.idRepasse = idRepasse;
 	}
 
 	public ProcedimentoPolicial getProcedimento() {
@@ -92,7 +86,7 @@ public class Repasse {
 	}
 
 	public void setDataConfirmacao(LocalDateTime dataConfirmacao) {
-			this.dataConfirmacao = dataConfirmacao;
+		this.dataConfirmacao = dataConfirmacao;
 	}
 
 	public StatusRepasse getStatus() {

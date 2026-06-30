@@ -1,5 +1,5 @@
- /bin/
-/.settings/
-/.classpath
-/.project
+bin/
+.settings/
+.classpath
+.project
 src/agenda_oitiva/config/ConexaoBD.java 

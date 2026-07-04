@@ -32,7 +32,7 @@ public class FuncionarioDelegacia extends Pessoa {
 	    this.isAdmin = isAdmin;
 	    this.statusCadastro = statusCadastro;
 	}
-	}
+	
 
 	public FuncionarioDelegacia() {
 		super();

@@ -1,6 +1,8 @@
 package documentos.model;
 
 import java.time.LocalDateTime;
+import documentos.model.StatusPosse;
+
 
 import agenda_oitiva.model.FuncionarioDelegacia;
 import agenda_oitiva.model.ProcedimentoPolicial;
@@ -10,6 +12,7 @@ public class Posse {
 	private ProcedimentoPolicial procedimento;
 	private FuncionarioDelegacia funcionarioAtual;
 	private LocalDateTime dataPosse;
+	private StatusPosse status;
 	private String observacao;
 
 	public Posse(ProcedimentoPolicial procedimento, FuncionarioDelegacia funcionario, String observacao) {
@@ -20,12 +23,13 @@ public class Posse {
 	}
 
 	public Posse(int idPosse, ProcedimentoPolicial procedimento, FuncionarioDelegacia funcionarioAtual,
-			LocalDateTime dataPosse, String observacao) {
+			LocalDateTime dataPosse, String observacao, StatusPosse status) {
 		this.idPosse = idPosse;
 		this.procedimento = procedimento;
 		this.funcionarioAtual = funcionarioAtual;
 		this.dataPosse = dataPosse;
 		this.observacao = observacao;
+		this.status = status;
 	}
 
 	public int getIdPosse() {
@@ -71,6 +75,14 @@ public class Posse {
 
 	public void setObservacao(String observacao) {
 		this.observacao = observacao;
+	}
+
+	public StatusPosse getStatus() {
+		return status;
+	}
+
+	public void setStatus(StatusPosse status) {
+		this.status = status;
 	}
 
 }

@@ -168,4 +168,23 @@ public class RepasseDAO {
             throw new RuntimeException("Erro ao atualizar status do repasse: " + e.getMessage());
         }
     }
+    
+    public boolean existeRepassePendente(int idProcedimento) {
+        String sql = "SELECT COUNT(*) FROM repasse " +
+                     "WHERE id_procedimento = ? AND status = ?::status_repasse";
+
+        try (Connection conn = ConexaoBD.conectar();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, idProcedimento);
+            stmt.setString(2, StatusRepasse.PENDENTE.name());
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) return rs.getInt(1) > 0;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao verificar repasse pendente: " + e.getMessage());
+        }
+        return false;
+    }
 }

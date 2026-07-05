@@ -75,4 +75,28 @@ public class FuncionarioDAO {
 		}
 		return -1;
 	}
+
+	public FuncionarioDelegacia buscarPorId(int idFuncionario) {
+		String sql = "SELECT f.id_funcionario, p.nome, p.cpf, f.login, f.senha_hash, f.cargo, "
+				+ "f.is_admin, f.status_cadastro " + "FROM funcionario f "
+				+ "JOIN pessoa p ON f.id_pessoa = p.id_pessoa " + "WHERE f.id_funcionario = ?";
+
+		try (Connection conn = ConexaoBD.conectar(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+			stmt.setInt(1, idFuncionario);
+
+			try (ResultSet rs = stmt.executeQuery()) {
+				if (rs.next()) {
+					CargoFuncional cargo = CargoFuncional.valueOf(rs.getString("cargo"));
+					StatusCadastro statusCadastro = StatusCadastro.valueOf(rs.getString("status_cadastro"));
+					return new FuncionarioDelegacia(rs.getInt("id_funcionario"), rs.getString("nome"),
+							rs.getString("cpf"), cargo, rs.getString("login"), rs.getString("senha_hash").trim(),
+							rs.getBoolean("is_admin"), statusCadastro);
+				}
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Erro ao buscar funcionário por ID: " + e.getMessage());
+		}
+		return null;
+	}
 }

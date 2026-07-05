@@ -3,6 +3,7 @@ package agenda_oitiva.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 
 import agenda_oitiva.config.ConexaoBD;
 import agenda_oitiva.model.CargoFuncional;
@@ -98,5 +99,59 @@ public class FuncionarioDAO {
 			throw new RuntimeException("Erro ao buscar funcionário por ID: " + e.getMessage());
 		}
 		return null;
+	}
+
+	public ArrayList<FuncionarioDelegacia> listarPendentes() {
+		String sql = "SELECT f.id_funcionario, p.nome, p.cpf, f.login, f.senha_hash, f.cargo, "
+				+ "f.is_admin, f.status_cadastro " + "FROM funcionario f "
+				+ "JOIN pessoa p ON f.id_pessoa = p.id_pessoa " + "WHERE f.status_cadastro = ?::status_cadastro_enum";
+
+		ArrayList<FuncionarioDelegacia> lista = new ArrayList<>();
+
+		try (Connection conn = ConexaoBD.conectar(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+			stmt.setString(1, StatusCadastro.PENDENTE.name());
+
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next()) {
+					CargoFuncional cargo = CargoFuncional.valueOf(rs.getString("cargo"));
+					StatusCadastro statusCadastro = StatusCadastro.valueOf(rs.getString("status_cadastro"));
+					lista.add(new FuncionarioDelegacia(rs.getInt("id_funcionario"), rs.getString("nome"),
+							rs.getString("cpf"), cargo, rs.getString("login"), rs.getString("senha_hash").trim(),
+							rs.getBoolean("is_admin"), statusCadastro));
+				}
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Erro ao listar pendentes: " + e.getMessage());
+		}
+		return lista;
+	}
+
+	public void atualizarStatus(int idFuncionario, StatusCadastro novoStatus) {
+		String sql = "UPDATE funcionario SET status_cadastro = ?::status_cadastro_enum " + "WHERE id_funcionario = ?";
+
+		try (Connection conn = ConexaoBD.conectar(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+			stmt.setString(1, novoStatus.name());
+			stmt.setInt(2, idFuncionario);
+			stmt.executeUpdate();
+
+		} catch (Exception e) {
+			throw new RuntimeException("Erro ao atualizar status do cadastro: " + e.getMessage());
+		}
+	}
+
+	public void resetarSenha(int idFuncionario, String novaSenha) {
+		String sql = "UPDATE funcionario SET senha_hash = ? WHERE id_funcionario = ?";
+
+		try (Connection conn = ConexaoBD.conectar(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+			stmt.setString(1, FuncionarioDelegacia.gerarHash(novaSenha));
+			stmt.setInt(2, idFuncionario);
+			stmt.executeUpdate();
+
+		} catch (Exception e) {
+			throw new RuntimeException("Erro ao resetar senha: " + e.getMessage());
+		}
 	}
 }

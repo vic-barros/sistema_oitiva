@@ -127,6 +127,32 @@ public class FuncionarioDAO {
 		return lista;
 	}
 
+	public ArrayList<FuncionarioDelegacia> listarAprovados() {
+		String sql = "SELECT f.id_funcionario, p.nome, p.cpf, f.login, f.senha_hash, f.cargo, "
+				+ "f.is_admin, f.status_cadastro " + "FROM funcionario f "
+				+ "JOIN pessoa p ON f.id_pessoa = p.id_pessoa " + "WHERE f.status_cadastro = ?::status_cadastro_enum";
+
+		ArrayList<FuncionarioDelegacia> lista = new ArrayList<>();
+
+		try (Connection conn = ConexaoBD.conectar(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+			stmt.setString(1, StatusCadastro.APROVADO.name());
+
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next()) {
+					CargoFuncional cargo = CargoFuncional.valueOf(rs.getString("cargo"));
+					StatusCadastro statusCadastro = StatusCadastro.valueOf(rs.getString("status_cadastro"));
+					lista.add(new FuncionarioDelegacia(rs.getInt("id_funcionario"), rs.getString("nome"),
+							rs.getString("cpf"), cargo, rs.getString("login"), rs.getString("senha_hash").trim(),
+							rs.getBoolean("is_admin"), statusCadastro));
+				}
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Erro ao listar aprovados: " + e.getMessage());
+		}
+		return lista;
+	}
+
 	public void atualizarStatus(int idFuncionario, StatusCadastro novoStatus) {
 		String sql = "UPDATE funcionario SET status_cadastro = ?::status_cadastro_enum " + "WHERE id_funcionario = ?";
 

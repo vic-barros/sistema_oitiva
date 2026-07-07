@@ -128,8 +128,9 @@ public class Servidor {
 				enviarResposta(ex, 403, "{\"sucesso\":false,\"erro\":\"Cadastro ainda nao foi aprovado\"}");
 				return;
 			}
-			String json = "{\"sucesso\":true,\"nome\":\"" + f.getNome() + "\",\"cargo\":\"" + f.getCargo()
-					+ "\",\"login\":\"" + f.getLogin() + "\"}";
+			String json = "{\"sucesso\":true,\"idFuncionario\":" + f.getIdFuncionario() + ",\"nome\":\"" + f.getNome()
+					+ "\",\"cargo\":\"" + f.getCargo() + "\",\"login\":\"" + f.getLogin() + "\",\"isAdmin\":"
+					+ f.isAdmin() + "}";
 			enviarResposta(ex, 200, json);
 		} else {
 			enviarResposta(ex, 401, "{\"sucesso\":false}");
@@ -224,28 +225,7 @@ public class Servidor {
 		}
 
 		if (ex.getRequestMethod().equalsIgnoreCase("POST")) {
-			String corpo = lerCorpo(ex);
-			try {
-				String nome = extrairCampo(corpo, "nome");
-				String cpf = extrairCampo(corpo, "cpf");
-				String login = extrairCampo(corpo, "login");
-				String senha = extrairCampo(corpo, "senha");
-				String cargoStr = extrairCampo(corpo, "cargo");
 
-				if (funcionarioDAO.buscarPorLogin(login) != null) {
-					enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"Login ja cadastrado!\"}");
-					return;
-				}
-
-				CargoFuncional cargo = CargoFuncional.valueOf(cargoStr);
-				FuncionarioDelegacia novoFuncionario = new FuncionarioDelegacia(nome, cpf.isBlank() ? null : cpf, cargo,
-						login, senha);
-				funcionarioDAO.inserir(novoFuncionario);
-
-				enviarResposta(ex, 200, "{\"sucesso\":true}");
-			} catch (Exception e) {
-				enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + e.getMessage() + "\"}");
-			}
 		}
 	}
 
@@ -267,7 +247,9 @@ public class Servidor {
 
 		try {
 			// Verifica se quem está chamando é admin
-			String loginRequerente = extrairCampo(corpo, "loginAdmin");
+			String loginRequerente = ex.getRequestMethod().equalsIgnoreCase("GET")
+					? extrairParametroUrl(query, "loginAdmin")
+					: extrairCampo(corpo, "loginAdmin");
 			FuncionarioDelegacia admin = funcionarioDAO.buscarPorLogin(loginRequerente);
 
 			if (admin == null || !admin.isAdmin()) {

@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polícia Civil - Administração</title>
+    <style>
+        :root {
+            --primary-color: #1a202c;
+            --secondary-color: #2d3748;
+            --accent-color: #3182ce;
+            --accent-hover: #2b6cb0;
+            --bg-color: #edf2f7;
+            --card-bg: #ffffff;
+            --text-color: #2d3748;
+            --border-color: #cbd5e0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header .title { font-size: 1.2rem; font-weight: bold; letter-spacing: 0.5px; }
+
+        header .user-badge {
+            background: var(--secondary-color);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            border: 1px solid #4a5568;
+        }
+
+        header button {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 15px;
+            font-size: 0.85rem;
+        }
+
+        header button:hover { background: #c53030; }
+
+        header button.btn-voltar {
+            background: var(--secondary-color);
+            border: 1px solid #4a5568;
+        }
+
+        header button.btn-voltar:hover { background: #4a5568; }
+
+        .main-container {
+            padding: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 30px;
+            flex: 1;
+        }
+
+        .sidebar {
+            background: var(--card-bg);
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            padding: 15px 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            height: fit-content;
+        }
+
+        .sidebar-menu { list-style: none; }
+
+        .sidebar-item {
+            padding: 12px 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #4a5568;
+            cursor: pointer;
+            border-left: 4px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .sidebar-item:hover, .sidebar-item.active {
+            background: #f7fafc;
+            color: var(--accent-color);
+        }
+
+        .sidebar-item.active {
+            border-left-color: var(--accent-color);
+            background: #ebf8ff;
+        }
+
+        .form-group { margin-bottom: 15px; }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #4a5568;
+            text-transform: uppercase;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: #fff;
+            color: var(--text-color);
+            font-size: 0.95rem;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(49,130,206,0.15);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+            font-size: 0.85rem;
+            color: #4a5568;
+            cursor: pointer;
+        }
+
+        .checkbox-group input { width: auto; cursor: pointer; }
+
+        button.btn-primary {
+            width: 100%;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button.btn-primary:hover { background-color: var(--accent-hover); }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            height: fit-content;
+        }
+
+        .card h3 {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid #edf2f7;
+            padding-bottom: 10px;
+        }
+
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+
+        .table-responsive { overflow-x: auto; margin-top: 15px; }
+
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem; }
+
+        th {
+            background-color: #f7fafc;
+            color: #4a5568;
+            font-weight: 600;
+            padding: 12px 15px;
+            border-bottom: 2px solid #e2e8f0;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+
+        td { padding: 12px 15px; border-bottom: 1px solid #edf2f7; vertical-align: middle; }
+        tr:hover td { background-color: #f8fafc; }
+
+        .badge-tipo {
+            background: #edf2f7;
+            color: #4a5568;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .btn-action {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            border: 1px solid #cbd5e0;
+            cursor: pointer;
+            background: white;
+            margin-right: 5px;
+            font-weight: 600;
+        }
+
+        .btn-aprovar { color: #22543d; border-color: #c6f6d5; }
+        .btn-aprovar:hover { background: #c6f6d5; }
+        .btn-recusar { color: #9b2c2c; border-color: #fed7d7; }
+        .btn-recusar:hover { background: #fed7d7; }
+
+        .empty-msg { text-align: center; color: #718096; padding: 30px; font-size: 0.9rem; }
+
+        #customToast {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #2b6cb0;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 10000;
+            font-weight: bold;
+            font-size: 0.95rem;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        #customConfirmModal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .confirm-card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .confirm-title { color: var(--primary-color); margin-bottom: 12px; font-size: 1.2rem; }
+        .confirm-text { color: #4a5568; margin-bottom: 24px; font-size: 0.95rem; line-height: 1.4; }
+        .confirm-actions { display: flex; justify-content: center; gap: 15px; }
+
+        .btn-modal { padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; }
+        .btn-modal-cancel { background-color: #edf2f7; color: #4a5568; }
+        .btn-modal-cancel:hover { background-color: #e2e8f0; }
+        .btn-modal-confirm { background-color: #e53e3e; color: white; }
+        .btn-modal-confirm:hover { background-color: #c53030; }
+
+        @keyframes slideIn {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="customToast">Mensagem aqui</div>
+
+    <div id="customConfirmModal">
+        <div class="confirm-card">
+            <h4 class="confirm-title">Confirmar Ação</h4>
+            <p class="confirm-text" id="confirmMessage">Deseja realmente prosseguir?</p>
+            <div class="confirm-actions">
+                <button class="btn-modal btn-modal-cancel" id="btnConfirmCancel">Cancelar</button>
+                <button class="btn-modal btn-modal-confirm" id="btnConfirmOk">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <header>
+        <div class="title">POLÍCIA CIVIL - ADMINISTRAÇÃO</div>
+        <div>
+            <span class="user-badge">
+                Bem-vindo(a), <strong id="lblUsuario">Nome</strong>
+            </span>
+            <button class="btn-voltar" onclick="voltarModulos()">Módulos</button>
+            <button onclick="efetuarLogout()">Sair</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+
+        <aside class="sidebar">
+            <ul class="sidebar-menu" id="menuLateral">
+                <li class="sidebar-item active" id="menu-sec-pendentes" onclick="mudarAba('sec-pendentes')">📋 Cadastros Pendentes</li>
+                <li class="sidebar-item" id="menu-sec-resetar" onclick="mudarAba('sec-resetar')">🔑 Resetar Senha</li>
+            </ul>
+        </aside>
+
+        <div class="content-area">
+
+            <!-- CADASTROS PENDENTES -->
+            <section id="sec-pendentes" class="content-section card active">
+                <h3>Cadastros Aguardando Aprovação</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Login</th>
+                                <th>Cargo</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaPendentes"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- RESETAR SENHA -->
+            <section id="sec-resetar" class="content-section card">
+                <h3>Resetar Senha de Funcionário</h3>
+                <form id="formResetar" onsubmit="resetarSenha(event)" style="max-width: 500px;">
+                    <div class="form-group">
+                        <label>Funcionário</label>
+                        <select id="resFuncionario" required>
+                            <option value="">-- Selecione o funcionário --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Nova Senha</label>
+                        <input type="password" id="resNovaSenha" required placeholder="Defina a nova senha">
+                        <label class="checkbox-group">
+                            <input type="checkbox" onchange="toggleMostrarSenha()"> Mostrar senha
+                        </label>
+                    </div>
+                    <button type="submit" class="btn-primary">Resetar Senha</button>
+                </form>
+            </section>
+
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:8080';
+        let usuarioLogado = null;
+
+        // ── SESSÃO E GUARDA DE ACESSO ─────────────────────────
+        (function carregarSessao() {
+            const salvo = sessionStorage.getItem('usuarioLogado');
+            if (!salvo) {
+                window.location.href = '../index.html';
+                return;
+            }
+            usuarioLogado = JSON.parse(salvo);
+
+            if (!usuarioLogado.isAdmin) {
+                // Não é admin: não deveria nem ter chegado aqui, manda de volta.
+                window.location.href = '../index.html';
+                return;
+            }
+
+            document.getElementById('lblUsuario').innerText = usuarioLogado.nome;
+            carregarPendentes();
+            carregarFuncionariosParaReset();
+        })();
+
+        function voltarModulos() { window.location.href = '../index.html'; }
+
+        function efetuarLogout() {
+            sessionStorage.removeItem('usuarioLogado');
+            window.location.href = '../index.html';
+        }
+
+        // ── UTILITÁRIOS ───────────────────────────────────────
+        function toggleMostrarSenha() {
+            const input = document.getElementById('resNovaSenha');
+            input.type = input.type === "password" ? "text" : "password";
+        }
+
+        function exibirNotificacao(mensagem, tipo = "success") {
+            const toast = document.getElementById('customToast');
+            toast.innerText = mensagem;
+            toast.style.backgroundColor = tipo === "error" ? "#e53e3e" : "#2b6cb0";
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        }
+
+        function solicitarConfirmacao(mensagem, acao) {
+            document.getElementById('confirmMessage').innerText = mensagem;
+            document.getElementById('customConfirmModal').style.display = 'flex';
+            confirmActionRef = acao;
+        }
+
+        let confirmActionRef = null;
+
+        document.getElementById('btnConfirmCancel').addEventListener('click', () => {
+            document.getElementById('customConfirmModal').style.display = 'none';
+            confirmActionRef = null;
+        });
+
+        document.getElementById('btnConfirmOk').addEventListener('click', () => {
+            document.getElementById('customConfirmModal').style.display = 'none';
+            if (confirmActionRef) confirmActionRef();
+            confirmActionRef = null;
+        });
+
+        function mudarAba(secaoId) {
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
+            document.getElementById(secaoId).classList.add('active');
+            document.getElementById('menu-' + secaoId).classList.add('active');
+
+            if (secaoId === 'sec-pendentes') carregarPendentes();
+        }
+
+        // ── CADASTROS PENDENTES ───────────────────────────────
+        async function carregarPendentes() {
+            try {
+                const resp = await fetch(`${API}/admin?acao=pendentes&loginAdmin=${usuarioLogado.login}`);
+                const pendentes = await resp.json();
+                renderizarPendentes(pendentes);
+            } catch (e) {
+                exibirNotificacao("Erro ao carregar cadastros pendentes.", "error");
+            }
+        }
+
+        function renderizarPendentes(pendentes) {
+            const corpo = document.getElementById('tabelaPendentes');
+            corpo.innerHTML = '';
+
+            if (pendentes.length === 0) {
+                corpo.innerHTML = `<tr><td colspan="4" class="empty-msg">Nenhum cadastro pendente de aprovação.</td></tr>`;
+                return;
+            }
+
+            pendentes.forEach(f => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${f.nome}</strong></td>
+                    <td>${f.login}</td>
+                    <td><span class="badge-tipo">${f.cargo}</span></td>
+                    <td>
+                        <button class="btn-action btn-aprovar" onclick="aprovarCadastro(${f.idFuncionario})">Aprovar</button>
+                        <button class="btn-action btn-recusar" onclick="recusarCadastro(${f.idFuncionario})">Recusar</button>
+                    </td>
+                `;
+                corpo.appendChild(tr);
+            });
+        }
+
+        async function aprovarCadastro(idFuncionario) {
+            solicitarConfirmacao("Aprovar este cadastro? O funcionário poderá fazer login em seguida.", async () => {
+                try {
+                    const resp = await fetch(`${API}/admin?acao=aprovar`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ loginAdmin: usuarioLogado.login, idFuncionario })
+                    });
+                    const dados = await resp.json();
+                    if (dados.sucesso) {
+                        exibirNotificacao("Cadastro aprovado com sucesso!");
+                        carregarPendentes();
+                        carregarFuncionariosParaReset();
+                    } else {
+                        exibirNotificacao("Erro: " + (dados.erro || "não foi possível aprovar."), "error");
+                    }
+                } catch (e) {
+                    exibirNotificacao("Erro ao conectar com o servidor.", "error");
+                }
+            });
+        }
+
+        async function recusarCadastro(idFuncionario) {
+            solicitarConfirmacao("Recusar este cadastro? O funcionário não poderá fazer login.", async () => {
+                try {
+                    const resp = await fetch(`${API}/admin?acao=recusar`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ loginAdmin: usuarioLogado.login, idFuncionario })
+                    });
+                    const dados = await resp.json();
+                    if (dados.sucesso) {
+                        exibirNotificacao("Cadastro recusado.");
+                        carregarPendentes();
+                    } else {
+                        exibirNotificacao("Erro: " + (dados.erro || "não foi possível recusar."), "error");
+                    }
+                } catch (e) {
+                    exibirNotificacao("Erro ao conectar com o servidor.", "error");
+                }
+            });
+        }
+
+        // ── RESETAR SENHA ─────────────────────────────────────
+        async function carregarFuncionariosParaReset() {
+            try {
+                const resp = await fetch(`${API}/funcionarios`);
+                const lista = await resp.json();
+
+                const select = document.getElementById('resFuncionario');
+                select.innerHTML = '<option value="">-- Selecione o funcionário --</option>';
+
+                lista.forEach(f => {
+                    const opt = document.createElement('option');
+                    opt.value = f.idFuncionario;
+                    opt.innerText = `${f.nome} (${f.login}) - ${f.cargo}`;
+                    select.appendChild(opt);
+                });
+            } catch (e) {
+                exibirNotificacao("Erro ao carregar lista de funcionários.", "error");
+            }
+        }
+
+        async function resetarSenha(event) {
+            event.preventDefault();
+
+            const idFuncionario = parseInt(document.getElementById('resFuncionario').value);
+            const novaSenha = document.getElementById('resNovaSenha').value;
+
+            solicitarConfirmacao("Resetar a senha deste funcionário?", async () => {
+                try {
+                    const resp = await fetch(`${API}/admin?acao=resetarSenha`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ loginAdmin: usuarioLogado.login, idFuncionario, novaSenha })
+                    });
+                    const dados = await resp.json();
+                    if (dados.sucesso) {
+                        exibirNotificacao("Senha resetada com sucesso!");
+                        document.getElementById('formResetar').reset();
+                    } else {
+                        exibirNotificacao("Erro: " + (dados.erro || "não foi possível resetar."), "error");
+                    }
+                } catch (e) {
+                    exibirNotificacao("Erro ao conectar com o servidor.", "error");
+                }
+            });
+        }
+    </script>
+</body>
+</html>

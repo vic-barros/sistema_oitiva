@@ -109,6 +109,15 @@ public class Servidor {
 		return "";
 	}
 
+	private String escaparJson(String texto) {
+	    if (texto == null) return "";
+	    return texto.replace("\\", "\\\\")
+	                 .replace("\"", "\\\"")
+	                 .replace("\n", "\\n")
+	                 .replace("\r", "\\r")
+	                 .replace("\t", "\\t");
+	}
+
 	// ── ROTAS ────────────────────────────────────────────────
 
 	private void handleLogin(HttpExchange ex) throws IOException {
@@ -224,8 +233,48 @@ public class Servidor {
 			return;
 		}
 
-		if (ex.getRequestMethod().equalsIgnoreCase("POST")) {
+		if (ex.getRequestMethod().equalsIgnoreCase("GET")) {
+			try {
+				ArrayList<FuncionarioDelegacia> lista = funcionarioDAO.listarAprovados();
+				StringBuilder sb = new StringBuilder("[");
+				for (int i = 0; i < lista.size(); i++) {
+					if (i > 0)
+						sb.append(",");
+					FuncionarioDelegacia f = lista.get(i);
+					sb.append("{").append("\"idFuncionario\":").append(f.getIdFuncionario()).append(",")
+							.append("\"nome\":\"").append(f.getNome()).append("\",").append("\"login\":\"")
+							.append(f.getLogin()).append("\",").append("\"cargo\":\"").append(f.getCargo()).append("\"")
+							.append("}");
+				}
+				sb.append("]");
+				enviarResposta(ex, 200, sb.toString());
+			} catch (Exception e) {
+				enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
+			}
 
+		} else if (ex.getRequestMethod().equalsIgnoreCase("POST")) {
+			String corpo = lerCorpo(ex);
+			try {
+				String nome = extrairCampo(corpo, "nome");
+				String cpf = extrairCampo(corpo, "cpf");
+				String login = extrairCampo(corpo, "login");
+				String senha = extrairCampo(corpo, "senha");
+				String cargoStr = extrairCampo(corpo, "cargo");
+
+				if (funcionarioDAO.buscarPorLogin(login) != null) {
+					enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"Login ja cadastrado!\"}");
+					return;
+				}
+
+				CargoFuncional cargo = CargoFuncional.valueOf(cargoStr);
+				FuncionarioDelegacia novoFuncionario = new FuncionarioDelegacia(nome, cpf.isBlank() ? null : cpf, cargo,
+						login, senha);
+				funcionarioDAO.inserir(novoFuncionario);
+
+				enviarResposta(ex, 200, "{\"sucesso\":true}");
+			} catch (Exception e) {
+				enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
+			}
 		}
 	}
 

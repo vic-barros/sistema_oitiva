@@ -96,6 +96,13 @@ public class ServidorDocumentos {
 		return "";
 	}
 
+	private String escaparJson(String texto) {
+		if (texto == null)
+			return "";
+		return texto.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r").replace("\t",
+				"\\t");
+	}
+
 	// ── ROTAS ────────────────────────────────────────────────
 
 	private void handleRegistrar(HttpExchange ex) throws IOException {
@@ -130,7 +137,7 @@ public class ServidorDocumentos {
 
 			enviarResposta(ex, 200, "{\"sucesso\":true,\"idProcedimento\":" + idProcedimento + "}");
 		} catch (Exception e) {
-			enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + e.getMessage() + "\"}");
+			enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
 		}
 	}
 
@@ -168,9 +175,9 @@ public class ServidorDocumentos {
 
 		} catch (IllegalStateException e) {
 			// Erros de regra de negócio (posse errada, procedimento arquivado, etc.)
-			enviarResposta(ex, 422, "{\"sucesso\":false,\"erro\":\"" + e.getMessage() + "\"}");
+			enviarResposta(ex, 422, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
 		} catch (Exception e) {
-			enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + e.getMessage() + "\"}");
+			enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
 		}
 	}
 
@@ -195,9 +202,9 @@ public class ServidorDocumentos {
 			enviarResposta(ex, 200, "{\"sucesso\":true}");
 
 		} catch (IllegalStateException e) {
-			enviarResposta(ex, 422, "{\"sucesso\":false,\"erro\":\"" + e.getMessage() + "\"}");
+			enviarResposta(ex, 422, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
 		} catch (Exception e) {
-			enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + e.getMessage() + "\"}");
+			enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
 		}
 	}
 
@@ -222,9 +229,9 @@ public class ServidorDocumentos {
 			enviarResposta(ex, 200, "{\"sucesso\":true}");
 
 		} catch (IllegalStateException e) {
-			enviarResposta(ex, 422, "{\"sucesso\":false,\"erro\":\"" + e.getMessage() + "\"}");
+			enviarResposta(ex, 422, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
 		} catch (Exception e) {
-			enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + e.getMessage() + "\"}");
+			enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
 		}
 	}
 
@@ -258,7 +265,7 @@ public class ServidorDocumentos {
 			enviarResposta(ex, 200, json);
 
 		} catch (Exception e) {
-			enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + e.getMessage() + "\"}");
+			enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
 		}
 	}
 
@@ -294,7 +301,7 @@ public class ServidorDocumentos {
 			enviarResposta(ex, 200, sb.toString());
 
 		} catch (Exception e) {
-			enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + e.getMessage() + "\"}");
+			enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
 		}
 	}
 }

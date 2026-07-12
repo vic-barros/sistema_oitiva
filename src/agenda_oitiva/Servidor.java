@@ -189,7 +189,7 @@ public class Servidor {
 				oitivaDAO.inserir(oitiva);
 				enviarResposta(ex, 200, "{\"sucesso\":true}");
 			} catch (Exception e) {
-				enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + e.getMessage() + "\"}");
+			    enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
 			}
 		}
 	}
@@ -341,7 +341,7 @@ public class Servidor {
 			default -> enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"Ação inválida\"}");
 			}
 		} catch (Exception e) {
-			enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + e.getMessage() + "\"}");
+		    enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
 		}
 	}
 }

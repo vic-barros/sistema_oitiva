@@ -390,6 +390,16 @@
                 </div>
             `;
 
+            if (usuarioLogado.cargo === 'POLICIAL') {
+                cardsHtml += `
+                    <div class="modulo-card" onclick="irPara('funcionarios/funcionarios.html')">
+                        <div class="icone">👥</div>
+                        <h3>Cadastrar Funcionário</h3>
+                        <p>Registrar novo servidor no sistema (aguarda aprovação do admin).</p>
+                    </div>
+                `;
+            }
+
             if (usuarioLogado.isAdmin) {
                 cardsHtml += `
                     <div class="modulo-card admin" onclick="irPara('admin/admin.html')">

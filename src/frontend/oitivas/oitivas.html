@@ -573,46 +573,6 @@
                     </div>
                 </section>
 
-                <section id="sec-cadastrar-funcionario" class="content-section card">
-                    <h3>Novo Funcionário da Delegacia</h3>
-
-                    <form id="formFuncionario" onsubmit="cadastrarFuncionarioSimulado(event)" style="max-width: 600px;">
-
-                        <div class="form-group">
-                            <label>Nome:</label>
-                            <input type="text" id="funcNome" required placeholder="Nome completo do servidor">
-                        </div>
-
-                        <div class="form-group">
-                            <label>CPF:</label>
-                            <input type="text" id="funcCpf" required placeholder="Ex: 000.000.000-00">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Login:</label>
-                            <input type="text" id="funcLogin" required placeholder="Defina o usuário de login">
-                        </div>
-
-                        <div class="form-group" style="margin-bottom: 15px;">
-                            <label>Senha:</label>
-                            <input type="password" id="funcSenha" required placeholder="Defina a senha inicial">
-                            <label class="checkbox-group">
-                                <input type="checkbox" onchange="toggleMostrarSenha('funcSenha')"> Mostrar senha
-                            </label>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Cargo:</label>
-                            <select id="funcCargo">
-                                <option value="POLICIAL">POLICIAL</option>
-                                <option value="ESTAGIARIO">ESTAGIÁRIO</option>
-                            </select>
-                        </div>
-
-                        <button type="submit" class="btn-primary" style="margin-top: 15px;">[ CADASTRAR ]</button>
-                    </form>
-                </section>
-
             </div>
         </div>
     </div>
@@ -713,7 +673,6 @@
                 menu.innerHTML = `
                     <li class="sidebar-item active" id="menu-sec-cadastrar-oitiva" onclick="mudarAba('sec-cadastrar-oitiva')">📝 Cadastrar Oitiva</li>
                     <li class="sidebar-item" id="menu-sec-listar-oitivas" onclick="mudarAba('sec-listar-oitivas')">📋 Listar e Buscar</li>
-                    <li class="sidebar-item" id="menu-sec-cadastrar-funcionario" onclick="mudarAba('sec-cadastrar-funcionario')">👥 Cadastrar Funcionário</li>
                 `;
             } else if (usuarioLogado.cargo === 'ESTAGIARIO') {
                 menu.innerHTML = `
@@ -786,37 +745,6 @@
                     document.getElementById('minuto').value = "00";
                     await carregarOitivas();
                     exibirNotificacao("Oitiva cadastrada com sucesso!");
-                    mudarAba('sec-listar-oitivas');
-                } else {
-                    exibirNotificacao("Erro: " + (dados.erro || "verifique os dados."), "error");
-                }
-            } catch (e) {
-                exibirNotificacao("Erro ao conectar com o servidor.", "error");
-            }
-        }
-
-        // ── FUNCIONÁRIOS ──────────────────────────────────────
-        async function cadastrarFuncionarioSimulado(event) {
-            event.preventDefault();
-
-            const corpo = {
-                nome:   document.getElementById('funcNome').value.trim(),
-                cpf:    document.getElementById('funcCpf').value.trim(),
-                login:  document.getElementById('funcLogin').value.trim(),
-                senha:  document.getElementById('funcSenha').value,
-                cargo:  document.getElementById('funcCargo').value
-            };
-
-            try {
-                const resp = await fetch(`${API}/funcionarios`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(corpo)
-                });
-                const dados = await resp.json();
-                if (dados.sucesso) {
-                    document.getElementById('formFuncionario').reset();
-                    exibirNotificacao("Funcionário " + corpo.nome + " cadastrado com sucesso!");
                     mudarAba('sec-listar-oitivas');
                 } else {
                     exibirNotificacao("Erro: " + (dados.erro || "verifique os dados."), "error");

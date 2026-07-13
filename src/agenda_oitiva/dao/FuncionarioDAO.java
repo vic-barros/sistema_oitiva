@@ -15,13 +15,31 @@ public class FuncionarioDAO {
 	private PessoaDAO pessoaDAO = new PessoaDAO();
 
 	public int inserir(FuncionarioDelegacia funcionario) {
-		int idPessoa = pessoaDAO.inserir(funcionario);
+		String cpf = funcionario.getCpf();
+		int idPessoa;
+
+		if (cpf != null && pessoaDAO.existePorCpf(cpf)) {
+			idPessoa = pessoaDAO.buscarIdPorCpf(cpf);
+			FuncionarioDelegacia existente = buscarPorIdPessoa(idPessoa);
+
+			if (existente != null) {
+				if (existente.getStatusCadastro() == StatusCadastro.RECUSADO) {
+					reativar(existente.getIdFuncionario(), funcionario);
+					return existente.getIdFuncionario();
+				}
+				throw new IllegalStateException("Já existe cadastro de funcionário para este CPF (status: "
+						+ existente.getStatusCadastro() + ").");
+			}
+			// pessoa existe (ex: já apareceu como depoente numa oitiva), mas nunca foi
+			// funcionário
+		} else {
+			idPessoa = pessoaDAO.inserir(funcionario);
+		}
 
 		String sql = "INSERT INTO funcionario (id_pessoa, login, senha_hash, cargo," + " is_admin, status_cadastro) "
 				+ "VALUES (?, ?, ?, ?::cargo_funcional, ?, ?::status_cadastro_enum) RETURNING id_funcionario";
 
 		try (Connection conn = ConexaoBD.conectar(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-
 			stmt.setInt(1, idPessoa);
 			stmt.setString(2, funcionario.getLogin());
 			stmt.setString(3, funcionario.getSenhaHash());
@@ -97,6 +115,28 @@ public class FuncionarioDAO {
 			}
 		} catch (Exception e) {
 			throw new RuntimeException("Erro ao buscar funcionário por ID: " + e.getMessage());
+		}
+		return null;
+	}
+
+	public FuncionarioDelegacia buscarPorIdPessoa(int idPessoa) {
+		String sql = "SELECT f.id_funcionario, p.nome, p.cpf, f.login, f.senha_hash, f.cargo, "
+				+ "f.is_admin, f.status_cadastro " + "FROM funcionario f "
+				+ "JOIN pessoa p ON f.id_pessoa = p.id_pessoa " + "WHERE f.id_pessoa = ?";
+
+		try (Connection conn = ConexaoBD.conectar(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setInt(1, idPessoa);
+			try (ResultSet rs = stmt.executeQuery()) {
+				if (rs.next()) {
+					CargoFuncional cargo = CargoFuncional.valueOf(rs.getString("cargo"));
+					StatusCadastro statusCadastro = StatusCadastro.valueOf(rs.getString("status_cadastro"));
+					return new FuncionarioDelegacia(rs.getInt("id_funcionario"), rs.getString("nome"),
+							rs.getString("cpf"), cargo, rs.getString("login"), rs.getString("senha_hash").trim(),
+							rs.getBoolean("is_admin"), statusCadastro);
+				}
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Erro ao buscar funcionario por id_pessoa: " + e.getMessage());
 		}
 		return null;
 	}
@@ -180,4 +220,20 @@ public class FuncionarioDAO {
 			throw new RuntimeException("Erro ao resetar senha: " + e.getMessage());
 		}
 	}
+
+	public void reativar(int idFuncionario, FuncionarioDelegacia dados) {
+		String sql = "UPDATE funcionario SET login = ?, senha_hash = ?, cargo = ?::cargo_funcional, "
+				+ "status_cadastro = 'PENDENTE'::status_cadastro_enum WHERE id_funcionario = ?";
+
+		try (Connection conn = ConexaoBD.conectar(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setString(1, dados.getLogin());
+			stmt.setString(2, dados.getSenhaHash());
+			stmt.setString(3, dados.getCargo().name());
+			stmt.setInt(4, idFuncionario);
+			stmt.executeUpdate();
+		} catch (Exception e) {
+			throw new RuntimeException("Erro ao reativar cadastro: " + e.getMessage());
+		}
+	}
+
 }

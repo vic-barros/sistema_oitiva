@@ -110,12 +110,10 @@ public class Servidor {
 	}
 
 	private String escaparJson(String texto) {
-	    if (texto == null) return "";
-	    return texto.replace("\\", "\\\\")
-	                 .replace("\"", "\\\"")
-	                 .replace("\n", "\\n")
-	                 .replace("\r", "\\r")
-	                 .replace("\t", "\\t");
+		if (texto == null)
+			return "";
+		return texto.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r").replace("\t",
+				"\\t");
 	}
 
 	// ── ROTAS ────────────────────────────────────────────────
@@ -189,7 +187,7 @@ public class Servidor {
 				oitivaDAO.inserir(oitiva);
 				enviarResposta(ex, 200, "{\"sucesso\":true}");
 			} catch (Exception e) {
-			    enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
+				enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
 			}
 		}
 	}
@@ -261,7 +259,8 @@ public class Servidor {
 				String senha = extrairCampo(corpo, "senha");
 				String cargoStr = extrairCampo(corpo, "cargo");
 
-				if (funcionarioDAO.buscarPorLogin(login) != null) {
+				FuncionarioDelegacia existentePorLogin = funcionarioDAO.buscarPorLogin(login);
+				if (existentePorLogin != null && existentePorLogin.getStatusCadastro() != StatusCadastro.RECUSADO) {
 					enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"Login ja cadastrado!\"}");
 					return;
 				}
@@ -272,6 +271,8 @@ public class Servidor {
 				funcionarioDAO.inserir(novoFuncionario);
 
 				enviarResposta(ex, 200, "{\"sucesso\":true}");
+			} catch (IllegalStateException e) {
+				enviarResposta(ex, 422, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
 			} catch (Exception e) {
 				enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
 			}
@@ -341,7 +342,7 @@ public class Servidor {
 			default -> enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"Ação inválida\"}");
 			}
 		} catch (Exception e) {
-		    enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
+			enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
 		}
 	}
 }

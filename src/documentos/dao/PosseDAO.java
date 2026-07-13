@@ -81,6 +81,31 @@ public class PosseDAO {
 		}
 		return null;
 	}
+	
+	public Posse buscarPorNumeroOcorrencia(int numOcorrencia, int anoOcorrencia) {
+		String sql = "SELECT po.id_posse, po.data_posse, po.observacao, po.status, "
+				+ "pr.id_procedimento, pr.num_ocorrencia, pr.ano_ocorrencia, pr.crime, "
+				+ "f.id_funcionario, pf.nome, pf.cpf, f.login, f.cargo, f.is_admin, f.status_cadastro "
+				+ "FROM posse po " + "JOIN procedimento pr ON po.id_procedimento = pr.id_procedimento "
+				+ "JOIN funcionario f ON po.id_funcionario = f.id_funcionario "
+				+ "JOIN pessoa pf ON f.id_pessoa = pf.id_pessoa "
+				+ "WHERE pr.num_ocorrencia = ? AND pr.ano_ocorrencia = ?";
+
+		try (Connection conn = ConexaoBD.conectar(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+			stmt.setInt(1, numOcorrencia);
+			stmt.setInt(2, anoOcorrencia);
+
+			try (ResultSet rs = stmt.executeQuery()) {
+				if (rs.next()) {
+					return montarPosse(rs);
+				}
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Erro ao buscar posse por número de ocorrência: " + e.getMessage());
+		}
+		return null;
+	}
 
 	private Posse montarPosse(ResultSet rs) throws SQLException {
 		ProcedimentoPolicial proc = new ProcedimentoPolicial(rs.getInt("id_procedimento"), rs.getInt("num_ocorrencia"),

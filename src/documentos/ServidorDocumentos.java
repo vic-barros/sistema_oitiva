@@ -243,11 +243,12 @@ public class ServidorDocumentos {
 		}
 
 		try {
-			// Extrai o parâmetro da URL: /documentos/posse?idProcedimento=1
+			// Extrai os parâmetros da URL: /documentos/posse?numOcorrencia=1234&anoOcorrencia=2026
 			String query = ex.getRequestURI().getQuery();
-			int idProcedimento = Integer.parseInt(extrairParametroUrl(query, "idProcedimento"));
+			int numOcorrencia = Integer.parseInt(extrairParametroUrl(query, "numOcorrencia"));
+			int anoOcorrencia = Integer.parseInt(extrairParametroUrl(query, "anoOcorrencia"));
 
-			Posse posse = posseDAO.buscarPorProcedimento(idProcedimento);
+			Posse posse = posseDAO.buscarPorNumeroOcorrencia(numOcorrencia, anoOcorrencia);
 
 			if (posse == null) {
 				enviarResposta(ex, 404,

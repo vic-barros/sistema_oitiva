@@ -418,8 +418,10 @@
                 <h3>Solicitar Repasse de Procedimento</h3>
                 <form id="formRepassar" onsubmit="solicitarRepasse(event)" style="max-width: 600px;">
                     <div class="form-group">
-                        <label>Nº do Procedimento (ID interno)</label>
-                        <input type="number" id="repIdProcedimento" min="1" required placeholder="ID retornado no registro">
+                        <label>Procedimento</label>
+                        <select id="repIdProcedimento" required>
+                            <option value="">-- Selecione um procedimento em sua posse --</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label>Repassar para</label>
@@ -491,6 +493,7 @@
             document.getElementById('lblRegResponsavel').innerText = usuarioLogado.nome;
 
             carregarFuncionarios();
+            carregarMinhaPosse();
             carregarPendentes();
         })();
 
@@ -535,6 +538,7 @@
             document.getElementById('menu-' + secaoId).classList.add('active');
 
             if (secaoId === 'sec-pendentes') carregarPendentes();
+            if (secaoId === 'sec-repassar') carregarMinhaPosse();
         }
 
         // ── FUNCIONÁRIOS (pra popular o select de destino) ───
@@ -556,6 +560,32 @@
                     });
             } catch (e) {
                 exibirNotificacao("Erro ao carregar lista de funcionários.", "error");
+            }
+        }
+
+        // ── MINHA POSSE (pra popular o select de procedimento no repasse) ───
+        async function carregarMinhaPosse() {
+            try {
+                const resp = await fetch(`${API_DOC}/documentos/minhaposse?idFuncionario=${usuarioLogado.idFuncionario}`);
+                const lista = await resp.json();
+
+                const select = document.getElementById('repIdProcedimento');
+
+                if (lista.length === 0) {
+                    select.innerHTML = '<option value="">-- Você não possui procedimentos em posse --</option>';
+                    return;
+                }
+
+                select.innerHTML = '<option value="">-- Selecione um procedimento em sua posse --</option>';
+
+                lista.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.idProcedimento;
+                    opt.innerText = `${String(p.numOcorrencia).padStart(3, '0')}/${p.anoOcorrencia} - ${p.crime}`;
+                    select.appendChild(opt);
+                });
+            } catch (e) {
+                exibirNotificacao("Erro ao carregar seus procedimentos.", "error");
             }
         }
 

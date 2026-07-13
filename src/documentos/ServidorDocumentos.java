@@ -34,6 +34,7 @@ public class ServidorDocumentos {
 		server.createContext("/documentos/recusar", this::handleRecusar);
 		server.createContext("/documentos/posse", this::handlePosse);
 		server.createContext("/documentos/pendentes", this::handlePendentes);
+		server.createContext("/documentos/minhaposse", this::handleMinhaPosse);
 
 		server.setExecutor(null);
 		server.start();
@@ -300,6 +301,41 @@ public class ServidorDocumentos {
 
 			enviarResposta(ex, 200, sb.toString());
 
+		} catch (Exception e) {
+			enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
+		}
+	}
+
+	private void handleMinhaPosse(HttpExchange ex) throws IOException {
+		if (ex.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
+			enviarResposta(ex, 204, "");
+			return;
+		}
+
+		try {
+			// Extrai o parâmetro da URL: /documentos/minhaposse?idFuncionario=1
+			String query = ex.getRequestURI().getQuery();
+			int idFuncionario = Integer.parseInt(extrairParametroUrl(query, "idFuncionario"));
+
+			ArrayList<Posse> lista = posseDAO.listarPorFuncionario(idFuncionario);
+
+			StringBuilder sb = new StringBuilder("[");
+			for (int i = 0; i < lista.size(); i++) {
+				if (i > 0)
+					sb.append(",");
+				Posse p = lista.get(i);
+				sb.append("{").append("\"idProcedimento\":").append(p.getProcedimento().getIdProcedimento())
+						.append(",").append("\"numOcorrencia\":").append(p.getProcedimento().getNumeroOcorrencia())
+						.append(",").append("\"anoOcorrencia\":").append(p.getProcedimento().getAnoOcorrencia())
+						.append(",").append("\"crime\":\"").append(p.getProcedimento().getCrime()).append("\"")
+						.append("}");
+			}
+			sb.append("]");
+
+			enviarResposta(ex, 200, sb.toString());
+
+		} catch (IllegalStateException e) {
+			enviarResposta(ex, 422, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
 		} catch (Exception e) {
 			enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
 		}

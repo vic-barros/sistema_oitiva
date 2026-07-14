@@ -106,6 +106,42 @@ public class RepasseDAO {
         }
         return lista;
     }
+    
+    public ArrayList<Repasse> listarPorOrigem(int idFuncionarioOrigem) {
+        String sql = "SELECT r.id_repasse, r.data_solicitacao, r.data_confirmacao, r.status, r.observacao, " +
+                     "pr.id_procedimento, pr.num_ocorrencia, pr.ano_ocorrencia, pr.crime, " +
+                     "f_orig.id_funcionario AS id_origem, p_orig.nome AS nome_origem, " +
+                     "p_orig.cpf AS cpf_origem, f_orig.login AS login_origem, " +
+                     "f_orig.cargo AS cargo_origem, f_orig.is_admin AS admin_origem, " +
+                     "f_orig.status_cadastro AS status_origem, " +
+                     "f_dest.id_funcionario AS id_destino, p_dest.nome AS nome_destino, " +
+                     "p_dest.cpf AS cpf_destino, f_dest.login AS login_destino, " +
+                     "f_dest.cargo AS cargo_destino, f_dest.is_admin AS admin_destino, " +
+                     "f_dest.status_cadastro AS status_destino " +
+                     "FROM repasse r " +
+                     "JOIN procedimento pr ON r.id_procedimento = pr.id_procedimento " +
+                     "JOIN funcionario f_orig ON r.id_funcionario_origem = f_orig.id_funcionario " +
+                     "JOIN pessoa p_orig ON f_orig.id_pessoa = p_orig.id_pessoa " +
+                     "JOIN funcionario f_dest ON r.id_funcionario_destino = f_dest.id_funcionario " +
+                     "JOIN pessoa p_dest ON f_dest.id_pessoa = p_dest.id_pessoa " +
+                     "WHERE r.id_funcionario_origem = ? " +
+                     "ORDER BY r.data_solicitacao DESC";
+
+        ArrayList<Repasse> lista = new ArrayList<>();
+
+        try (Connection conn = ConexaoBD.conectar();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idFuncionarioOrigem);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(montarRepasse(rs));
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao listar solicitações de repasse: " + e.getMessage());
+        }
+        return lista;
+    }
 
     private Repasse montarRepasse(ResultSet rs) throws SQLException {
         ProcedimentoPolicial proc = new ProcedimentoPolicial(

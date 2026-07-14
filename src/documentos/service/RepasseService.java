@@ -77,4 +77,35 @@ public class RepasseService {
 		// Só atualiza o status — a posse NÃO muda
 		repasseDAO.atualizarStatus(idRepasse, StatusRepasse.RECUSADO);
 	}
+	
+	public void arquivarProcedimento(int idProcedimento, FuncionarioDelegacia funcionarioSolicitante) {
+		Posse posseAtual = posseDAO.buscarPorProcedimento(idProcedimento);
+		if (posseAtual == null) {
+			throw new IllegalStateException("Procedimento não está registrado no sistema");
+		}
+		if (posseAtual.getStatus() == StatusPosse.ARQUIVADO) {
+			throw new IllegalStateException("Procedimento já está arquivado");
+		}
+		if (posseAtual.getFuncionarioAtual().getIdFuncionario() != funcionarioSolicitante.getIdFuncionario()) {
+			throw new IllegalStateException("Você não tem a posse desse procedimento");
+		}
+		if (repasseDAO.existeRepassePendente(idProcedimento)) {
+			throw new IllegalStateException("Existe um repasse pendente para este procedimento, precisa aceitar/recusar o repasse para arquivar");
+		}
+		posseDAO.atualizarStatus(idProcedimento, StatusPosse.ARQUIVADO);
+	}
+
+	public void desarquivarProcedimento(int idProcedimento, FuncionarioDelegacia funcionarioSolicitante) {
+		Posse posseAtual = posseDAO.buscarPorProcedimento(idProcedimento);
+		if (posseAtual == null) {
+			throw new IllegalStateException("Procedimento não está registrado no sistema");
+		}
+		if (posseAtual.getStatus() == StatusPosse.ATIVO) {
+			throw new IllegalStateException("Procedimento já está ativo");
+		}
+		if (posseAtual.getFuncionarioAtual().getIdFuncionario() != funcionarioSolicitante.getIdFuncionario()) {
+			throw new IllegalStateException("Você não tem a posse desse procedimento");
+		}
+		posseDAO.atualizarStatus(idProcedimento, StatusPosse.ATIVO);
+	}
 }

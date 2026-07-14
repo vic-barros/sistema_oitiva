@@ -35,6 +35,9 @@ public class ServidorDocumentos {
 		server.createContext("/documentos/posse", this::handlePosse);
 		server.createContext("/documentos/pendentes", this::handlePendentes);
 		server.createContext("/documentos/minhaposse", this::handleMinhaPosse);
+		server.createContext("/documentos/arquivar", this::handleArquivar);
+		server.createContext("/documentos/desarquivar", this::handleDesarquivar);
+		server.createContext("/documentos/minhassolicitacoes", this::handleMinhasSolicitacoes);
 
 		server.setExecutor(null);
 		server.start();
@@ -256,10 +259,12 @@ public class ServidorDocumentos {
 				return;
 			}
 
-			String json = "{" + "\"sucesso\":true," + "\"idPosse\":" + posse.getIdPosse() + "," + "\"numOcorrencia\":"
+			String json = "{" + "\"sucesso\":true," + "\"idPosse\":" + posse.getIdPosse() + "," + "\"idProcedimento\":"
+					+ posse.getProcedimento().getIdProcedimento() + "," + "\"numOcorrencia\":"
 					+ posse.getProcedimento().getNumeroOcorrencia() + "," + "\"anoOcorrencia\":"
 					+ posse.getProcedimento().getAnoOcorrencia() + "," + "\"crime\":\""
-					+ posse.getProcedimento().getCrime() + "\"," + "\"funcionarioAtual\":\""
+					+ posse.getProcedimento().getCrime() + "\"," + "\"idFuncionarioAtual\":"
+					+ posse.getFuncionarioAtual().getIdFuncionario() + "," + "\"funcionarioAtual\":\""
 					+ posse.getFuncionarioAtual().getNome() + "\"," + "\"dataPosse\":\"" + posse.getDataPosse() + "\","
 					+ "\"status\":\"" + posse.getStatus() + "\"," + "\"observacao\":\""
 					+ (posse.getObservacao() != null ? posse.getObservacao() : "") + "\"" + "}";
@@ -334,6 +339,96 @@ public class ServidorDocumentos {
 			sb.append("]");
 
 			enviarResposta(ex, 200, sb.toString());
+
+		} catch (IllegalStateException e) {
+			enviarResposta(ex, 422, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
+		} catch (Exception e) {
+			enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
+		}
+	}
+	
+	private void handleMinhasSolicitacoes(HttpExchange ex) throws IOException {
+		if (ex.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
+			enviarResposta(ex, 204, "");
+			return;
+		}
+
+		try {
+			String query = ex.getRequestURI().getQuery();
+			int idFuncionario = Integer.parseInt(extrairParametroUrl(query, "idFuncionario"));
+
+			ArrayList<Repasse> lista = repasseDAO.listarPorOrigem(idFuncionario);
+
+			StringBuilder sb = new StringBuilder("[");
+			for (int i = 0; i < lista.size(); i++) {
+				if (i > 0)
+					sb.append(",");
+				Repasse r = lista.get(i);
+				sb.append("{").append("\"idRepasse\":").append(r.getIdRepasse()).append(",")
+						.append("\"numOcorrencia\":").append(r.getProcedimento().getNumeroOcorrencia()).append(",")
+						.append("\"anoOcorrencia\":").append(r.getProcedimento().getAnoOcorrencia()).append(",")
+						.append("\"crime\":\"").append(r.getProcedimento().getCrime()).append("\",")
+						.append("\"funcionarioDestino\":\"").append(r.getFuncionarioDestino().getNome()).append("\",")
+						.append("\"dataSolicitacao\":\"").append(r.getDataSolicitacao()).append("\",")
+						.append("\"status\":\"").append(r.getStatus()).append("\",")
+						.append("\"observacao\":\"").append(r.getObservacao() != null ? r.getObservacao() : "")
+						.append("\"").append("}");
+			}
+			sb.append("]");
+
+			enviarResposta(ex, 200, sb.toString());
+
+		} catch (Exception e) {
+			enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
+		}
+	}
+	
+	private void handleArquivar(HttpExchange ex) throws IOException {
+		if (ex.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
+			enviarResposta(ex, 204, "");
+			return;
+		}
+
+		String corpo = lerCorpo(ex);
+		try {
+			int idProcedimento = Integer.parseInt(extrairCampo(corpo, "idProcedimento"));
+			int idFuncionario = Integer.parseInt(extrairCampo(corpo, "idFuncionario"));
+
+			FuncionarioDelegacia funcionario = funcionarioDAO.buscarPorId(idFuncionario);
+			if (funcionario == null) {
+				enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"Funcionário não encontrado\"}");
+				return;
+			}
+
+			repasseService.arquivarProcedimento(idProcedimento, funcionario);
+			enviarResposta(ex, 200, "{\"sucesso\":true}");
+
+		} catch (IllegalStateException e) {
+			enviarResposta(ex, 422, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
+		} catch (Exception e) {
+			enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
+		}
+	}
+
+	private void handleDesarquivar(HttpExchange ex) throws IOException {
+		if (ex.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
+			enviarResposta(ex, 204, "");
+			return;
+		}
+
+		String corpo = lerCorpo(ex);
+		try {
+			int idProcedimento = Integer.parseInt(extrairCampo(corpo, "idProcedimento"));
+			int idFuncionario = Integer.parseInt(extrairCampo(corpo, "idFuncionario"));
+
+			FuncionarioDelegacia funcionario = funcionarioDAO.buscarPorId(idFuncionario);
+			if (funcionario == null) {
+				enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"Funcionário não encontrado\"}");
+				return;
+			}
+
+			repasseService.desarquivarProcedimento(idProcedimento, funcionario);
+			enviarResposta(ex, 200, "{\"sucesso\":true}");
 
 		} catch (IllegalStateException e) {
 			enviarResposta(ex, 422, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");

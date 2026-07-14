@@ -3,6 +3,7 @@ CREATE TYPE public.status_oitiva AS ENUM ('PENDENTE', 'AGENDADA', 'REMARCADA', '
 CREATE TYPE public.tipo_pessoa AS ENUM ('VITIMA', 'SUSPEITO', 'TESTEMUNHA');
 CREATE TYPE public.status_cadastro_enum AS ENUM ('PENDENTE', 'APROVADO', 'RECUSADO');
 CREATE TYPE public.status_repasse AS ENUM ('PENDENTE', 'CONFIRMADO', 'RECUSADO');
+CREATE TYPE public.status_posse AS ENUM ('ATIVO', 'ARQUIVADO');
 
 CREATE TABLE public.pessoa (
     id_pessoa SERIAL PRIMARY KEY,
@@ -24,7 +25,7 @@ CREATE TABLE public.funcionario (
     senha_hash CHARACTER(64) NOT NULL,
     cargo public.cargo_funcional NOT NULL,
     is_admin BOOLEAN NOT NULL DEFAULT false,
-    status_cadastro public.status_cadastro_enum NOT NULL DEFAULT 'pendente',
+    status_cadastro public.status_cadastro_enum NOT NULL DEFAULT 'PENDENTE',
     FOREIGN KEY (id_pessoa) REFERENCES public.pessoa(id_pessoa)
 );
 
@@ -32,7 +33,8 @@ CREATE TABLE public.procedimento (
     id_procedimento SERIAL PRIMARY KEY,
     num_ocorrencia INTEGER NOT NULL,
     ano_ocorrencia INTEGER NOT NULL,
-    crime VARCHAR(50)
+    crime VARCHAR(50),
+    CONSTRAINT procedimento_ocorrencia_key UNIQUE (num_ocorrencia, ano_ocorrencia)
 );
 
 CREATE TABLE public.oitiva (
@@ -54,6 +56,7 @@ CREATE TABLE public.posse (
     id_funcionario INTEGER NOT NULL,
     data_posse TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
     observacao TEXT,
+    status public.status_posse NOT NULL DEFAULT 'ATIVO',
     FOREIGN KEY (id_procedimento) REFERENCES public.procedimento(id_procedimento),
     FOREIGN KEY (id_funcionario) REFERENCES public.funcionario(id_funcionario)
 );
@@ -64,7 +67,7 @@ CREATE TABLE public.repasse (
     id_funcionario_origem INTEGER NOT NULL,
     id_funcionario_destino INTEGER NOT NULL,
     data_solicitacao TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
-    status public.status_repasse NOT NULL DEFAULT 'pendente',
+    status public.status_repasse NOT NULL DEFAULT 'PENDENTE',
     data_confirmacao TIMESTAMP WITH TIME ZONE,
     observacao TEXT,
     FOREIGN KEY (id_procedimento) REFERENCES public.procedimento(id_procedimento),

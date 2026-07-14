@@ -378,6 +378,7 @@
                 <li class="sidebar-item active" id="menu-sec-registrar" onclick="mudarAba('sec-registrar')">📥 Registrar Procedimento</li>
                 <li class="sidebar-item" id="menu-sec-repassar" onclick="mudarAba('sec-repassar')">🔁 Repassar Procedimento</li>
                 <li class="sidebar-item" id="menu-sec-pendentes" onclick="mudarAba('sec-pendentes')">📨 Meus Repasses Pendentes</li>
+                <li class="sidebar-item" id="menu-sec-solicitacoes" onclick="mudarAba('sec-solicitacoes')">📤 Minhas Solicitações</li>
                 <li class="sidebar-item" id="menu-sec-consultar" onclick="mudarAba('sec-consultar')">🔍 Consultar Posse</li>
             </ul>
         </aside>
@@ -452,6 +453,25 @@
                             </tr>
                         </thead>
                         <tbody id="tabelaPendentes"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- MINHAS SOLICITAÇÕES DE REPASSE -->
+            <section id="sec-solicitacoes" class="content-section card">
+                <h3>Minhas Solicitações de Repasse</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Procedimento</th>
+                                <th>Destinatário</th>
+                                <th>Solicitado em</th>
+                                <th>Status</th>
+                                <th>Observação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaSolicitacoes"></tbody>
                     </table>
                 </div>
             </section>
@@ -542,6 +562,7 @@
             document.getElementById('menu-' + secaoId).classList.add('active');
 
             if (secaoId === 'sec-pendentes') carregarPendentes();
+            if (secaoId === 'sec-solicitacoes') carregarMinhasSolicitacoes();
             if (secaoId === 'sec-repassar') carregarMinhaPosse();
         }
 
@@ -692,6 +713,43 @@
             });
         }
 
+        // ── MINHAS SOLICITAÇÕES DE REPASSE ────────────────────
+        async function carregarMinhasSolicitacoes() {
+            try {
+                const resp = await fetch(`${API_DOC}/documentos/minhassolicitacoes?idFuncionario=${usuarioLogado.idFuncionario}`);
+                const lista = await resp.json();
+                renderizarSolicitacoes(lista);
+            } catch (e) {
+                exibirNotificacao("Erro ao carregar suas solicitações de repasse.", "error");
+            }
+        }
+
+        function renderizarSolicitacoes(lista) {
+            const corpo = document.getElementById('tabelaSolicitacoes');
+            corpo.innerHTML = '';
+
+            if (lista.length === 0) {
+                corpo.innerHTML = `<tr><td colspan="5" class="empty-msg">Você ainda não solicitou nenhum repasse.</td></tr>`;
+                return;
+            }
+
+            lista.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <div><strong>Proc: ${String(r.numOcorrencia).padStart(3, '0')}/${r.anoOcorrencia}</strong></div>
+                        <div style="font-size:0.8rem; color:#4a5568;">${r.crime}</div>
+                    </td>
+                    <td>${r.funcionarioDestino}</td>
+                    <td>${r.dataSolicitacao}</td>
+                    <td><span class="badge-status status-${r.status}">${r.status}</span></td>
+                    <td>${r.observacao || '-'}</td>
+                `;
+                corpo.appendChild(tr);
+            });
+        }
+
+
         async function confirmarRepasse(idRepasse) {
             solicitarConfirmacao("Confirmar o recebimento deste procedimento?", async () => {
                 try {
@@ -747,6 +805,16 @@
 
                 if (dados.sucesso) {
                     div.style.display = 'block';
+
+                    let botaoAcao = '';
+                    if (dados.idFuncionarioAtual === usuarioLogado.idFuncionario) {
+                        if (dados.status === 'ATIVO') {
+                            botaoAcao = `<button class="btn-action btn-recusar" style="margin-top: 15px; width: 100%;" onclick="arquivarProcedimento(${dados.idProcedimento})">Arquivar Procedimento</button>`;
+                        } else {
+                            botaoAcao = `<button class="btn-action btn-confirmar" style="margin-top: 15px; width: 100%;" onclick="desarquivarProcedimento(${dados.idProcedimento})">Desarquivar Procedimento</button>`;
+                        }
+                    }
+
                     div.innerHTML = `
                         <div class="linha"><span>Procedimento</span><span>${String(dados.numOcorrencia).padStart(3, '0')}/${dados.anoOcorrencia}</span></div>
                         <div class="linha"><span>Crime</span><span>${dados.crime}</span></div>
@@ -754,6 +822,7 @@
                         <div class="linha"><span>Data da Posse</span><span>${dados.dataPosse}</span></div>
                         <div class="linha"><span>Status</span><span class="badge-status status-${dados.status}">${dados.status}</span></div>
                         <div class="linha"><span>Observação</span><span>${dados.observacao || '-'}</span></div>
+                        ${botaoAcao}
                     `;
                 } else {
                     div.style.display = 'block';
@@ -762,6 +831,49 @@
             } catch (e) {
                 exibirNotificacao("Erro ao conectar com o servidor de documentos.", "error");
             }
+        }
+
+        // ── ARQUIVAR / DESARQUIVAR ────────────────────────────
+        async function arquivarProcedimento(idProcedimento) {
+            solicitarConfirmacao("Arquivar este procedimento? Ele não poderá mais ser repassado enquanto arquivado.", async () => {
+                try {
+                    const resp = await fetch(`${API_DOC}/documentos/arquivar`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ idProcedimento, idFuncionario: usuarioLogado.idFuncionario })
+                    });
+                    const dados = await resp.json();
+                    if (dados.sucesso) {
+                        exibirNotificacao("Procedimento arquivado com sucesso.");
+                        document.getElementById('formConsultar').requestSubmit();
+                    } else {
+                        exibirNotificacao("Erro: " + (dados.erro || "não foi possível arquivar."), "error");
+                    }
+                } catch (e) {
+                    exibirNotificacao("Erro ao conectar com o servidor de documentos.", "error");
+                }
+            });
+        }
+
+        async function desarquivarProcedimento(idProcedimento) {
+            solicitarConfirmacao("Desarquivar este procedimento? Ele voltará a poder ser repassado.", async () => {
+                try {
+                    const resp = await fetch(`${API_DOC}/documentos/desarquivar`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ idProcedimento, idFuncionario: usuarioLogado.idFuncionario })
+                    });
+                    const dados = await resp.json();
+                    if (dados.sucesso) {
+                        exibirNotificacao("Procedimento desarquivado com sucesso.");
+                        document.getElementById('formConsultar').requestSubmit();
+                    } else {
+                        exibirNotificacao("Erro: " + (dados.erro || "não foi possível desarquivar."), "error");
+                    }
+                } catch (e) {
+                    exibirNotificacao("Erro ao conectar com o servidor de documentos.", "error");
+                }
+            });
         }
     </script>
 </body>

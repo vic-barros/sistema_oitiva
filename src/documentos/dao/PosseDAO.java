@@ -138,6 +138,30 @@ public class PosseDAO {
 	    }
 	}
 	
+	public ArrayList<Posse> listarTodos() {
+	    String sql = "SELECT po.id_posse, po.data_posse, po.observacao, po.status, "
+	            + "pr.id_procedimento, pr.num_ocorrencia, pr.ano_ocorrencia, pr.crime, "
+	            + "f.id_funcionario, pf.nome, pf.cpf, f.login, f.cargo, f.is_admin, f.status_cadastro "
+	            + "FROM posse po " + "JOIN procedimento pr ON po.id_procedimento = pr.id_procedimento "
+	            + "JOIN funcionario f ON po.id_funcionario = f.id_funcionario "
+	            + "JOIN pessoa pf ON f.id_pessoa = pf.id_pessoa "
+	            + "ORDER BY pr.ano_ocorrencia DESC, pr.num_ocorrencia DESC";
+
+	    ArrayList<Posse> lista = new ArrayList<>();
+
+	    try (Connection conn = ConexaoBD.conectar(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+	        try (ResultSet rs = stmt.executeQuery()) {
+	            while (rs.next()) {
+	                lista.add(montarPosse(rs));
+	            }
+	        }
+	    } catch (Exception e) {
+	        throw new RuntimeException("Erro ao listar acervo procedimental: " + e.getMessage());
+	    }
+	    return lista;
+	}
+	
 	public ArrayList<Posse> listarPorFuncionario(int idFuncionario) {
 	    String sql = "SELECT po.id_posse, po.data_posse, po.observacao, po.status, "
 	            + "pr.id_procedimento, pr.num_ocorrencia, pr.ano_ocorrencia, pr.crime, "

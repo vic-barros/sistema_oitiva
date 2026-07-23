@@ -380,6 +380,7 @@
                 <li class="sidebar-item" id="menu-sec-pendentes" onclick="mudarAba('sec-pendentes')">📨 Meus Repasses Pendentes</li>
                 <li class="sidebar-item" id="menu-sec-solicitacoes" onclick="mudarAba('sec-solicitacoes')">📤 Minhas Solicitações</li>
                 <li class="sidebar-item" id="menu-sec-consultar" onclick="mudarAba('sec-consultar')">🔍 Consultar Posse</li>
+                <li class="sidebar-item" id="menu-sec-acervo" onclick="mudarAba('sec-acervo')">🗄️ Acervo Procedimental</li>
             </ul>
         </aside>
 
@@ -494,6 +495,23 @@
                 <div class="resultado-posse" id="resultadoPosse"></div>
             </section>
 
+            <!-- ACERVO PROCEDIMENTAL -->
+            <section id="sec-acervo" class="content-section card">
+                <h3>Acervo Procedimental — Todos os Procedimentos</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Procedimento</th>
+                                <th>Responsável Atual</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaAcervo"></tbody>
+                    </table>
+                </div>
+            </section>
+
         </div>
     </div>
 
@@ -519,6 +537,10 @@
             carregarFuncionarios();
             carregarMinhaPosse();
             carregarPendentes();
+
+            if (usuarioLogado.cargo !== 'POLICIAL') {
+                document.getElementById('menu-sec-acervo').remove();
+            }
         })();
 
         function voltarModulos() { window.location.href = '../index.html'; }
@@ -564,6 +586,7 @@
             if (secaoId === 'sec-pendentes') carregarPendentes();
             if (secaoId === 'sec-solicitacoes') carregarMinhasSolicitacoes();
             if (secaoId === 'sec-repassar') carregarMinhaPosse();
+            if (secaoId === 'sec-acervo') carregarAcervo();
         }
 
         // ── FUNCIONÁRIOS (pra popular o select de destino) ───
@@ -612,6 +635,40 @@
             } catch (e) {
                 exibirNotificacao("Erro ao carregar seus procedimentos.", "error");
             }
+        }
+
+        // ── ACERVO PROCEDIMENTAL ───────────────────────────────
+        async function carregarAcervo() {
+            try {
+                const resp = await fetch(`${API_DOC}/documentos/acervo`);
+                const lista = await resp.json();
+                renderizarAcervo(lista);
+            } catch (e) {
+                exibirNotificacao("Erro ao carregar o acervo procedimental.", "error");
+            }
+        }
+
+        function renderizarAcervo(lista) {
+            const corpo = document.getElementById('tabelaAcervo');
+            corpo.innerHTML = '';
+
+            if (lista.length === 0) {
+                corpo.innerHTML = `<tr><td colspan="3" class="empty-msg">Nenhum procedimento registrado no sistema ainda.</td></tr>`;
+                return;
+            }
+
+            lista.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <div><strong>Proc: ${String(p.numOcorrencia).padStart(3, '0')}/${p.anoOcorrencia}</strong></div>
+                        <div style="font-size:0.8rem; color:#4a5568;">${p.crime}</div>
+                    </td>
+                    <td>${p.funcionarioAtual}</td>
+                    <td><span class="badge-status status-${p.status}">${p.status}</span></td>
+                `;
+                corpo.appendChild(tr);
+            });
         }
 
         // ── REGISTRAR PROCEDIMENTO ────────────────────────────

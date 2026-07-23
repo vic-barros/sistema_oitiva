@@ -38,6 +38,7 @@ public class ServidorDocumentos {
 		server.createContext("/documentos/arquivar", this::handleArquivar);
 		server.createContext("/documentos/desarquivar", this::handleDesarquivar);
 		server.createContext("/documentos/minhassolicitacoes", this::handleMinhasSolicitacoes);
+		server.createContext("/documentos/acervo", this::handleAcervo);
 
 		server.setExecutor(null);
 		server.start();
@@ -432,6 +433,37 @@ public class ServidorDocumentos {
 
 		} catch (IllegalStateException e) {
 			enviarResposta(ex, 422, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
+		} catch (Exception e) {
+			enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
+		}
+	}
+	
+	private void handleAcervo(HttpExchange ex) throws IOException {
+		if (ex.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
+			enviarResposta(ex, 204, "");
+			return;
+		}
+
+		try {
+			ArrayList<Posse> lista = posseDAO.listarTodos();
+
+			StringBuilder sb = new StringBuilder("[");
+			for (int i = 0; i < lista.size(); i++) {
+				if (i > 0)
+					sb.append(",");
+				Posse p = lista.get(i);
+				sb.append("{").append("\"idProcedimento\":").append(p.getProcedimento().getIdProcedimento())
+						.append(",").append("\"numOcorrencia\":").append(p.getProcedimento().getNumeroOcorrencia())
+						.append(",").append("\"anoOcorrencia\":").append(p.getProcedimento().getAnoOcorrencia())
+						.append(",").append("\"crime\":\"").append(p.getProcedimento().getCrime()).append("\",")
+						.append("\"funcionarioAtual\":\"").append(p.getFuncionarioAtual().getNome()).append("\",")
+						.append("\"status\":\"").append(p.getStatus()).append("\"")
+						.append("}");
+			}
+			sb.append("]");
+
+			enviarResposta(ex, 200, sb.toString());
+
 		} catch (Exception e) {
 			enviarResposta(ex, 400, "{\"sucesso\":false,\"erro\":\"" + escaparJson(e.getMessage()) + "\"}");
 		}

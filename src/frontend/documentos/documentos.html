@@ -292,6 +292,17 @@
             font-size: 0.9rem;
         }
 
+        .filter-bar {
+            display: grid;
+            grid-template-columns: 1fr 200px;
+            gap: 15px;
+            margin-bottom: 20px;
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
         #customToast {
             display: none;
             position: fixed;
@@ -498,6 +509,22 @@
             <!-- ACERVO PROCEDIMENTAL -->
             <section id="sec-acervo" class="content-section card">
                 <h3>Acervo Procedimental — Todos os Procedimentos</h3>
+
+                <div class="filter-bar">
+                    <div>
+                        <label style="font-size: 11px; font-weight: bold;">Nº Ocorrência</label>
+                        <input type="number" id="buscaAcervoNum" placeholder="Filtrar por número..." oninput="filtrarAcervo()">
+                    </div>
+                    <div>
+                        <label style="font-size: 11px; font-weight: bold;">Filtrar Status</label>
+                        <select id="buscaAcervoStatus" onchange="filtrarAcervo()">
+                            <option value="TODOS">TODOS</option>
+                            <option value="ATIVO">ATIVO</option>
+                            <option value="ARQUIVADO">ARQUIVADO</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="table-responsive">
                     <table>
                         <thead>
@@ -520,6 +547,7 @@
         const API_DOC = 'http://localhost:8081';
         let usuarioLogado = null;
         let listaFuncionarios = [];
+        let bancoAcervo = [];
         let confirmAction = null;
 
         // ── SESSÃO ────────────────────────────────────────────
@@ -641,11 +669,24 @@
         async function carregarAcervo() {
             try {
                 const resp = await fetch(`${API_DOC}/documentos/acervo`);
-                const lista = await resp.json();
-                renderizarAcervo(lista);
+                bancoAcervo = await resp.json();
+                renderizarAcervo(bancoAcervo);
             } catch (e) {
                 exibirNotificacao("Erro ao carregar o acervo procedimental.", "error");
             }
+        }
+
+        function filtrarAcervo() {
+            const numFiltro = document.getElementById('buscaAcervoNum').value;
+            const statusFiltro = document.getElementById('buscaAcervoStatus').value;
+
+            const resultado = bancoAcervo.filter(p => {
+                const bateNum = numFiltro === '' || String(p.numOcorrencia).includes(numFiltro);
+                const bateStatus = statusFiltro === 'TODOS' || p.status === statusFiltro;
+                return bateNum && bateStatus;
+            });
+
+            renderizarAcervo(resultado);
         }
 
         function renderizarAcervo(lista) {
@@ -653,7 +694,7 @@
             corpo.innerHTML = '';
 
             if (lista.length === 0) {
-                corpo.innerHTML = `<tr><td colspan="3" class="empty-msg">Nenhum procedimento registrado no sistema ainda.</td></tr>`;
+                corpo.innerHTML = `<tr><td colspan="3" class="empty-msg">Nenhum procedimento encontrado com os filtros atuais.</td></tr>`;
                 return;
             }
 

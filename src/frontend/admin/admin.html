@@ -3,24 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <title>Polícia Civil - Administração</title>
     <style>
         :root {
-            --primary-color: #1a202c;
-            --secondary-color: #2d3748;
-            --accent-color: #3182ce;
-            --accent-hover: #2b6cb0;
-            --bg-color: #edf2f7;
+            --primary-color: #1a1a1a;
+            --secondary-color: #1e3a5f;
+            --accent-color: #c9a961;
+            --accent-hover: #b08d3f;
+            --bg-color: #f4f2ed;
             --card-bg: #ffffff;
-            --text-color: #2d3748;
-            --border-color: #cbd5e0;
+            --text-color: #2d2d2d;
+            --border-color: #d8d3c8;
+            --font-display: 'Oswald', sans-serif;
+            --font-body: 'Inter', sans-serif;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: var(--font-body);
         }
 
         body {
@@ -39,14 +44,32 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-bottom: 3px solid var(--accent-color);
         }
 
-        header .title { font-size: 1.2rem; font-weight: bold; letter-spacing: 0.5px; }
+        header .title {
+            font-size: 1.15rem;
+            font-family: var(--font-display);
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .header-brasao {
+            width: 38px;
+            height: auto;
+        }
 
         header .user-badge {
             background: var(--secondary-color);
             padding: 8px 15px;
-            border-radius: 20px;
+            border-radius: 2px;
             font-size: 0.9rem;
             border: 1px solid #4a5568;
         }
@@ -56,7 +79,7 @@
             color: white;
             border: none;
             padding: 6px 12px;
-            border-radius: 4px;
+            border-radius: 2px;
             cursor: pointer;
             margin-left: 15px;
             font-size: 0.85rem;
@@ -84,7 +107,7 @@
 
         .sidebar {
             background: var(--card-bg);
-            border-radius: 8px;
+            border-radius: 3px;
             border: 1px solid #e2e8f0;
             padding: 15px 0;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
@@ -128,7 +151,7 @@
             width: 100%;
             padding: 10px;
             border: 1px solid var(--border-color);
-            border-radius: 6px;
+            border-radius: 3px;
             background-color: #fff;
             color: var(--text-color);
             font-size: 0.95rem;
@@ -158,7 +181,7 @@
             color: white;
             border: none;
             padding: 12px;
-            border-radius: 6px;
+            border-radius: 3px;
             font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
@@ -168,7 +191,7 @@
 
         .card {
             background: var(--card-bg);
-            border-radius: 8px;
+            border-radius: 3px;
             padding: 25px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             border: 1px solid #e2e8f0;
@@ -207,14 +230,14 @@
             background: #edf2f7;
             color: #4a5568;
             padding: 2px 8px;
-            border-radius: 4px;
+            border-radius: 2px;
             font-size: 0.75rem;
             font-weight: 600;
         }
 
         .btn-action {
             padding: 5px 10px;
-            border-radius: 4px;
+            border-radius: 2px;
             font-size: 0.8rem;
             border: 1px solid #cbd5e0;
             cursor: pointer;
@@ -235,10 +258,10 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: #2b6cb0;
+            background: var(--secondary-color);
             color: white;
             padding: 15px 25px;
-            border-radius: 8px;
+            border-radius: 3px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             z-index: 10000;
             font-weight: bold;
@@ -259,7 +282,7 @@
         .confirm-card {
             background: white;
             padding: 30px;
-            border-radius: 8px;
+            border-radius: 3px;
             width: 90%;
             max-width: 400px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
@@ -270,7 +293,7 @@
         .confirm-text { color: #4a5568; margin-bottom: 24px; font-size: 0.95rem; line-height: 1.4; }
         .confirm-actions { display: flex; justify-content: center; gap: 15px; }
 
-        .btn-modal { padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; }
+        .btn-modal { padding: 10px 20px; border-radius: 3px; font-weight: bold; cursor: pointer; border: none; }
         .btn-modal-cancel { background-color: #edf2f7; color: #4a5568; }
         .btn-modal-cancel:hover { background-color: #e2e8f0; }
         .btn-modal-confirm { background-color: #e53e3e; color: white; }
@@ -298,7 +321,10 @@
     </div>
 
     <header>
-        <div class="title">POLÍCIA CIVIL - ADMINISTRAÇÃO</div>
+        <div class="header-brand">
+            <img src="../assets/brasao_pcse.png" alt="Brasão Polícia Civil de Sergipe" class="header-brasao">
+            <div class="title">POLÍCIA CIVIL - ADMINISTRAÇÃO</div>
+        </div>
         <div>
             <span class="user-badge">
                 Bem-vindo(a), <strong id="lblUsuario">Nome</strong>
@@ -312,8 +338,8 @@
 
         <aside class="sidebar">
             <ul class="sidebar-menu" id="menuLateral">
-                <li class="sidebar-item active" id="menu-sec-pendentes" onclick="mudarAba('sec-pendentes')">📋 Cadastros Pendentes</li>
-                <li class="sidebar-item" id="menu-sec-resetar" onclick="mudarAba('sec-resetar')">🔑 Resetar Senha</li>
+                <li class="sidebar-item active" id="menu-sec-pendentes" onclick="mudarAba('sec-pendentes')"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg>Cadastros Pendentes</li>
+                <li class="sidebar-item" id="menu-sec-resetar" onclick="mudarAba('sec-resetar')"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="4"></circle><line x1="10.5" y1="10.5" x2="20" y2="20"></line><line x1="16" y1="14" x2="19" y2="11"></line><line x1="19" y1="17" x2="22" y2="14"></line></svg>Resetar Senha</li>
             </ul>
         </aside>
 
@@ -401,7 +427,7 @@
         function exibirNotificacao(mensagem, tipo = "success") {
             const toast = document.getElementById('customToast');
             toast.innerText = mensagem;
-            toast.style.backgroundColor = tipo === "error" ? "#e53e3e" : "#2b6cb0";
+            toast.style.backgroundColor = tipo === "error" ? "#e53e3e" : "#1e3a5f";
             toast.style.display = 'block';
             setTimeout(() => { toast.style.display = 'none'; }, 3000);
         }

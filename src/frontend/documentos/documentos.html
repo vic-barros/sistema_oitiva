@@ -3,18 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <title>Polícia Civil - Controle Cartorário</title>
     <style>
         :root {
-            --primary-color: #1a202c;
-            --secondary-color: #2d3748;
-            --accent-color: #3182ce;
-            --accent-hover: #2b6cb0;
-            --bg-color: #edf2f7;
+            --primary-color: #1a1a1a;
+            --secondary-color: #1e3a5f;
+            --accent-color: #c9a961;
+            --accent-hover: #b08d3f;
+            --bg-color: #f4f2ed;
             --card-bg: #ffffff;
-            --text-color: #2d3748;
-            --border-color: #cbd5e0;
-
+            --text-color: #2d2d2d;
+            --border-color: #d8d3c8;
+            --font-display: 'Oswald', sans-serif;
+            --font-body: 'Inter', sans-serif;
             --status-ativo: #c6f6d5;
             --status-ativo-text: #22543d;
             --status-arquivado: #e2e8f0;
@@ -31,7 +35,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: var(--font-body);
         }
 
         body {
@@ -50,18 +54,32 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-bottom: 3px solid var(--accent-color);
         }
 
         header .title {
-            font-size: 1.2rem;
-            font-weight: bold;
-            letter-spacing: 0.5px;
+            font-size: 1.15rem;
+            font-family: var(--font-display);
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .header-brasao {
+            width: 38px;
+            height: auto;
         }
 
         header .user-badge {
             background: var(--secondary-color);
             padding: 8px 15px;
-            border-radius: 20px;
+            border-radius: 2px;
             font-size: 0.9rem;
             border: 1px solid #4a5568;
         }
@@ -71,7 +89,7 @@
             color: white;
             border: none;
             padding: 6px 12px;
-            border-radius: 4px;
+            border-radius: 2px;
             cursor: pointer;
             margin-left: 15px;
             font-size: 0.85rem;
@@ -99,7 +117,7 @@
 
         .sidebar {
             background: var(--card-bg);
-            border-radius: 8px;
+            border-radius: 3px;
             border: 1px solid #e2e8f0;
             padding: 15px 0;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
@@ -146,7 +164,7 @@
             width: 100%;
             padding: 10px;
             border: 1px solid var(--border-color);
-            border-radius: 6px;
+            border-radius: 3px;
             background-color: #fff;
             color: var(--text-color);
             font-size: 0.95rem;
@@ -165,7 +183,7 @@
             color: white;
             border: none;
             padding: 12px;
-            border-radius: 6px;
+            border-radius: 3px;
             font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
@@ -179,7 +197,7 @@
             color: #2d3748;
             border: 1px solid var(--border-color);
             padding: 10px 16px;
-            border-radius: 6px;
+            border-radius: 3px;
             font-size: 0.9rem;
             font-weight: bold;
             cursor: pointer;
@@ -189,7 +207,7 @@
 
         .card {
             background: var(--card-bg);
-            border-radius: 8px;
+            border-radius: 3px;
             padding: 25px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             border: 1px solid #e2e8f0;
@@ -236,7 +254,7 @@
 
         .badge-status {
             padding: 4px 8px;
-            border-radius: 4px;
+            border-radius: 2px;
             font-size: 0.75rem;
             font-weight: bold;
             text-transform: uppercase;
@@ -251,7 +269,7 @@
 
         .btn-action {
             padding: 5px 10px;
-            border-radius: 4px;
+            border-radius: 2px;
             font-size: 0.8rem;
             border: 1px solid #cbd5e0;
             cursor: pointer;
@@ -269,7 +287,7 @@
             margin-top: 20px;
             padding: 20px;
             background: #f7fafc;
-            border-radius: 6px;
+            border-radius: 3px;
             border: 1px solid #e2e8f0;
             display: none;
         }
@@ -299,7 +317,7 @@
             margin-bottom: 20px;
             background: #f7fafc;
             padding: 15px;
-            border-radius: 6px;
+            border-radius: 3px;
             border: 1px solid #e2e8f0;
         }
 
@@ -308,10 +326,10 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: #2b6cb0;
+            background: var(--secondary-color);
             color: white;
             padding: 15px 25px;
-            border-radius: 8px;
+            border-radius: 3px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             z-index: 10000;
             font-weight: bold;
@@ -333,7 +351,7 @@
         .confirm-card {
             background: white;
             padding: 30px;
-            border-radius: 8px;
+            border-radius: 3px;
             width: 90%;
             max-width: 400px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
@@ -344,7 +362,7 @@
         .confirm-text { color: #4a5568; margin-bottom: 24px; font-size: 0.95rem; line-height: 1.4; }
         .confirm-actions { display: flex; justify-content: center; gap: 15px; }
 
-        .btn-modal { padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; }
+        .btn-modal { padding: 10px 20px; border-radius: 3px; font-weight: bold; cursor: pointer; border: none; }
         .btn-modal-cancel { background-color: #edf2f7; color: #4a5568; }
         .btn-modal-cancel:hover { background-color: #e2e8f0; }
         .btn-modal-confirm { background-color: #e53e3e; color: white; }
@@ -372,7 +390,10 @@
     </div>
 
     <header>
-        <div class="title">POLÍCIA CIVIL - CONTROLE CARTORÁRIO</div>
+        <div class="header-brand">
+            <img src="../assets/brasao_pcse.png" alt="Brasão Polícia Civil de Sergipe" class="header-brasao">
+            <div class="title">POLÍCIA CIVIL - CONTROLE CARTORÁRIO</div>
+        </div>
         <div>
             <span class="user-badge">
                 Bem-vindo(a), <strong id="lblUsuario">Nome</strong> | Cargo: <span id="lblCargo">Cargo</span>
@@ -386,12 +407,12 @@
 
         <aside class="sidebar">
             <ul class="sidebar-menu" id="menuLateral">
-                <li class="sidebar-item active" id="menu-sec-registrar" onclick="mudarAba('sec-registrar')">📥 Registrar Procedimento</li>
-                <li class="sidebar-item" id="menu-sec-repassar" onclick="mudarAba('sec-repassar')">🔁 Repassar Procedimento</li>
-                <li class="sidebar-item" id="menu-sec-pendentes" onclick="mudarAba('sec-pendentes')">📨 Meus Repasses Pendentes</li>
-                <li class="sidebar-item" id="menu-sec-solicitacoes" onclick="mudarAba('sec-solicitacoes')">📤 Minhas Solicitações</li>
-                <li class="sidebar-item" id="menu-sec-consultar" onclick="mudarAba('sec-consultar')">🔍 Consultar Posse</li>
-                <li class="sidebar-item" id="menu-sec-acervo" onclick="mudarAba('sec-acervo')">🗄️ Acervo Procedimental</li>
+                <li class="sidebar-item active" id="menu-sec-registrar" onclick="mudarAba('sec-registrar')"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>Registrar Procedimento</li>
+                <li class="sidebar-item" id="menu-sec-repassar" onclick="mudarAba('sec-repassar')"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>Repassar Procedimento</li>
+                <li class="sidebar-item" id="menu-sec-pendentes" onclick="mudarAba('sec-pendentes')"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>Meus Repasses Pendentes</li>
+                <li class="sidebar-item" id="menu-sec-solicitacoes" onclick="mudarAba('sec-solicitacoes')"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>Minhas Solicitações</li>
+                <li class="sidebar-item" id="menu-sec-consultar" onclick="mudarAba('sec-consultar')"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>Consultar Posse</li>
+                <li class="sidebar-item" id="menu-sec-acervo" onclick="mudarAba('sec-acervo')"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>Acervo Procedimental</li>
             </ul>
         </aside>
 
@@ -582,7 +603,7 @@
         function exibirNotificacao(mensagem, tipo = "success") {
             const toast = document.getElementById('customToast');
             toast.innerText = mensagem;
-            toast.style.backgroundColor = tipo === "error" ? "#e53e3e" : "#2b6cb0";
+            toast.style.backgroundColor = tipo === "error" ? "#e53e3e" : "#1e3a5f";
             toast.style.display = 'block';
             setTimeout(() => { toast.style.display = 'none'; }, 3000);
         }

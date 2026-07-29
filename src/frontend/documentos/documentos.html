@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Polícia Civil - Controle Cartorário</title>
+    <style>
+        :root {
+            --primary-color: #1a1a1a;
+            --secondary-color: #1e3a5f;
+            --accent-color: #c9a961;
+            --accent-hover: #b08d3f;
+            --bg-color: #f4f2ed;
+            --card-bg: #ffffff;
+            --text-color: #2d2d2d;
+            --border-color: #d8d3c8;
+            --font-display: 'Oswald', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --status-ativo: #c6f6d5;
+            --status-ativo-text: #22543d;
+            --status-arquivado: #e2e8f0;
+            --status-arquivado-text: #4a5568;
+            --status-pendente: #feebc8;
+            --status-pendente-text: #975a16;
+            --status-confirmado: #c6f6d5;
+            --status-confirmado-text: #22543d;
+            --status-recusado: #fed7d7;
+            --status-recusado-text: #9b2c2c;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-body);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-bottom: 3px solid var(--accent-color);
+        }
+
+        header .title {
+            font-size: 1.15rem;
+            font-family: var(--font-display);
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .header-brasao {
+            width: 38px;
+            height: auto;
+        }
+
+        header .user-badge {
+            background: var(--secondary-color);
+            padding: 8px 15px;
+            border-radius: 2px;
+            font-size: 0.9rem;
+            border: 1px solid #4a5568;
+        }
+
+        header button {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 2px;
+            cursor: pointer;
+            margin-left: 15px;
+            font-size: 0.85rem;
+        }
+
+        header button:hover { background: #c53030; }
+
+        header button.btn-voltar {
+            background: var(--secondary-color);
+            border: 1px solid #4a5568;
+        }
+
+        header button.btn-voltar:hover { background: #4a5568; }
+
+        .main-container {
+            padding: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 30px;
+            flex: 1;
+        }
+
+        .sidebar {
+            background: var(--card-bg);
+            border-radius: 3px;
+            border: 1px solid #e2e8f0;
+            padding: 15px 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            height: fit-content;
+        }
+
+        .sidebar-menu { list-style: none; }
+
+        .sidebar-item {
+            padding: 12px 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #4a5568;
+            cursor: pointer;
+            border-left: 4px solid transparent;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-item:hover, .sidebar-item.active {
+            background: #f7fafc;
+            color: var(--accent-color);
+        }
+
+        .sidebar-item.active {
+            border-left-color: var(--accent-color);
+            background: #ebf8ff;
+        }
+
+        .form-group { margin-bottom: 15px; }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #4a5568;
+            text-transform: uppercase;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            background-color: #fff;
+            color: var(--text-color);
+            font-size: 0.95rem;
+            transition: border 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(49,130,206,0.15);
+        }
+
+        button.btn-primary {
+            width: 100%;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 3px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button.btn-primary:hover { background-color: var(--accent-hover); }
+
+        button.btn-secondary {
+            background-color: #edf2f7;
+            color: #2d3748;
+            border: 1px solid var(--border-color);
+            padding: 10px 16px;
+            border-radius: 3px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button.btn-secondary:hover { background-color: #e2e8f0; }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 3px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+            height: fit-content;
+        }
+
+        .card h3 {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid #edf2f7;
+            padding-bottom: 10px;
+        }
+
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+
+        .table-responsive { overflow-x: auto; margin-top: 15px; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+
+        th {
+            background-color: #f7fafc;
+            color: #4a5568;
+            font-weight: 600;
+            padding: 12px 15px;
+            border-bottom: 2px solid #e2e8f0;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #edf2f7;
+            vertical-align: middle;
+        }
+
+        tr:hover td { background-color: #f8fafc; }
+
+        .badge-status {
+            padding: 4px 8px;
+            border-radius: 2px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+
+        .status-ATIVO { background-color: var(--status-ativo); color: var(--status-ativo-text); }
+        .status-ARQUIVADO { background-color: var(--status-arquivado); color: var(--status-arquivado-text); }
+        .status-PENDENTE { background-color: var(--status-pendente); color: var(--status-pendente-text); }
+        .status-CONFIRMADO { background-color: var(--status-confirmado); color: var(--status-confirmado-text); }
+        .status-RECUSADO { background-color: var(--status-recusado); color: var(--status-recusado-text); }
+
+        .btn-action {
+            padding: 5px 10px;
+            border-radius: 2px;
+            font-size: 0.8rem;
+            border: 1px solid #cbd5e0;
+            cursor: pointer;
+            background: white;
+            margin-right: 5px;
+            font-weight: 600;
+        }
+
+        .btn-confirmar { color: #22543d; border-color: #c6f6d5; }
+        .btn-confirmar:hover { background: #c6f6d5; }
+        .btn-recusar { color: #9b2c2c; border-color: #fed7d7; }
+        .btn-recusar:hover { background: #fed7d7; }
+
+        .resultado-posse {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 3px;
+            border: 1px solid #e2e8f0;
+            display: none;
+        }
+
+        .resultado-posse .linha {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px dashed #e2e8f0;
+            font-size: 0.9rem;
+        }
+
+        .resultado-posse .linha:last-child { border-bottom: none; }
+        .resultado-posse .linha span:first-child { color: #718096; font-weight: 600; }
+
+        .empty-msg {
+            text-align: center;
+            color: #718096;
+            padding: 30px;
+            font-size: 0.9rem;
+        }
+
+        .filter-bar {
+            display: grid;
+            grid-template-columns: 1fr 200px;
+            gap: 15px;
+            margin-bottom: 20px;
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 3px;
+            border: 1px solid #e2e8f0;
+        }
+
+        #customToast {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--secondary-color);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 3px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            z-index: 10000;
+            font-weight: bold;
+            font-size: 0.95rem;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        #customConfirmModal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .confirm-card {
+            background: white;
+            padding: 30px;
+            border-radius: 3px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .confirm-title { color: var(--primary-color); margin-bottom: 12px; font-size: 1.2rem; }
+        .confirm-text { color: #4a5568; margin-bottom: 24px; font-size: 0.95rem; line-height: 1.4; }
+        .confirm-actions { display: flex; justify-content: center; gap: 15px; }
+
+        .btn-modal { padding: 10px 20px; border-radius: 3px; font-weight: bold; cursor: pointer; border: none; }
+        .btn-modal-cancel { background-color: #edf2f7; color: #4a5568; }
+        .btn-modal-cancel:hover { background-color: #e2e8f0; }
+        .btn-modal-confirm { background-color: #e53e3e; color: white; }
+        .btn-modal-confirm:hover { background-color: #c53030; }
+
+        @keyframes slideIn {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="customToast">Mensagem aqui</div>
+
+    <div id="customConfirmModal">
+        <div class="confirm-card">
+            <h4 class="confirm-title">Confirmar Ação</h4>
+            <p class="confirm-text" id="confirmMessage">Deseja realmente prosseguir?</p>
+            <div class="confirm-actions">
+                <button class="btn-modal btn-modal-cancel" id="btnConfirmCancel">Cancelar</button>
+                <button class="btn-modal btn-modal-confirm" id="btnConfirmOk">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <header>
+        <div class="header-brand">
+            <img src="../assets/brasao_pcse.png" alt="Brasão Polícia Civil de Sergipe" class="header-brasao">
+            <div class="title">POLÍCIA CIVIL - CONTROLE CARTORÁRIO</div>
+        </div>
+        <div>
+            <span class="user-badge">
+                Bem-vindo(a), <strong id="lblUsuario">Nome</strong> | Cargo: <span id="lblCargo">Cargo</span>
+            </span>
+            <button class="btn-voltar" onclick="voltarModulos()">Módulos</button>
+            <button onclick="efetuarLogout()">Sair</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+
+        <aside class="sidebar">
+            <ul class="sidebar-menu" id="menuLateral">
+                <li class="sidebar-item active" id="menu-sec-registrar" onclick="mudarAba('sec-registrar')"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>Registrar Procedimento</li>
+                <li class="sidebar-item" id="menu-sec-repassar" onclick="mudarAba('sec-repassar')"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg>Repassar Procedimento</li>
+                <li class="sidebar-item" id="menu-sec-pendentes" onclick="mudarAba('sec-pendentes')"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path></svg>Meus Repasses Pendentes</li>
+                <li class="sidebar-item" id="menu-sec-solicitacoes" onclick="mudarAba('sec-solicitacoes')"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>Minhas Solicitações</li>
+                <li class="sidebar-item" id="menu-sec-consultar" onclick="mudarAba('sec-consultar')"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>Consultar Posse</li>
+                <li class="sidebar-item" id="menu-sec-acervo" onclick="mudarAba('sec-acervo')"><svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>Acervo Procedimental</li>
+            </ul>
+        </aside>
+
+        <div class="content-area">
+
+            <!-- REGISTRAR PROCEDIMENTO -->
+            <section id="sec-registrar" class="content-section card active">
+                <h3>Registrar Novo Procedimento no Sistema Cartorário</h3>
+                <form id="formRegistrar" onsubmit="registrarProcedimento(event)" style="max-width: 600px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="form-group">
+                            <label>Nº Ocorrência</label>
+                            <input type="number" id="regNumOcorrencia" min="1" required placeholder="Nº">
+                        </div>
+                        <div class="form-group">
+                            <label>Ano Ocorrência</label>
+                            <input type="number" id="regAnoOcorrencia" value="2026" min="1980" max="2026" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Crime Investigado</label>
+                        <input type="text" id="regCrime" placeholder="Ex: Roubo Majorado" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Observações</label>
+                        <textarea id="regObservacao" rows="3" placeholder="Observações sobre a posse inicial..."></textarea>
+                    </div>
+                    <p style="font-size: 0.85rem; color: #718096; margin-bottom: 15px;">
+                        A posse inicial do procedimento será atribuída a você (<strong id="lblRegResponsavel">-</strong>).
+                    </p>
+                    <button type="submit" class="btn-primary">Registrar Procedimento</button>
+                </form>
+            </section>
+
+            <!-- REPASSAR PROCEDIMENTO -->
+            <section id="sec-repassar" class="content-section card">
+                <h3>Solicitar Repasse de Procedimento</h3>
+                <form id="formRepassar" onsubmit="solicitarRepasse(event)" style="max-width: 600px;">
+                    <div class="form-group">
+                        <label>Procedimento</label>
+                        <select id="repIdProcedimento" required>
+                            <option value="">-- Selecione um procedimento em sua posse --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Repassar para</label>
+                        <select id="repDestino" required>
+                            <option value="">-- Selecione o destinatário --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Observações</label>
+                        <textarea id="repObservacao" rows="3" placeholder="Motivo do repasse..."></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary">Solicitar Repasse</button>
+                </form>
+            </section>
+
+            <!-- MEUS REPASSES PENDENTES -->
+            <section id="sec-pendentes" class="content-section card">
+                <h3>Repasses Pendentes de Confirmação</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Procedimento</th>
+                                <th>Origem</th>
+                                <th>Solicitado em</th>
+                                <th>Observação</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaPendentes"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- MINHAS SOLICITAÇÕES DE REPASSE -->
+            <section id="sec-solicitacoes" class="content-section card">
+                <h3>Minhas Solicitações de Repasse</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Procedimento</th>
+                                <th>Destinatário</th>
+                                <th>Solicitado em</th>
+                                <th>Status</th>
+                                <th>Observação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaSolicitacoes"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- CONSULTAR POSSE -->
+            <section id="sec-consultar" class="content-section card">
+                <h3>Consultar Posse de Procedimento</h3>
+                <form id="formConsultar" onsubmit="consultarPosse(event)" style="max-width: 500px; display: flex; gap: 10px; align-items: flex-end;">
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label>Nº Ocorrência</label>
+                        <input type="number" id="consNumOcorrencia" min="1" required placeholder="Ex: 1234">
+                    </div>
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label>Ano</label>
+                        <input type="number" id="consAnoOcorrencia" min="1980" max="2026" value="2026" required placeholder="Ex: 2026">
+                    </div>
+                    <button type="submit" class="btn-secondary" style="height: 42px;">Consultar</button>
+                </form>
+
+                <div class="resultado-posse" id="resultadoPosse"></div>
+            </section>
+
+            <!-- ACERVO PROCEDIMENTAL -->
+            <section id="sec-acervo" class="content-section card">
+                <h3>Acervo Procedimental — Todos os Procedimentos</h3>
+
+                <div class="filter-bar">
+                    <div>
+                        <label style="font-size: 11px; font-weight: bold;">Nº Ocorrência</label>
+                        <input type="number" id="buscaAcervoNum" placeholder="Filtrar por número..." oninput="filtrarAcervo()">
+                    </div>
+                    <div>
+                        <label style="font-size: 11px; font-weight: bold;">Filtrar Status</label>
+                        <select id="buscaAcervoStatus" onchange="filtrarAcervo()">
+                            <option value="TODOS">TODOS</option>
+                            <option value="ATIVO">ATIVO</option>
+                            <option value="ARQUIVADO">ARQUIVADO</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Procedimento</th>
+                                <th>Responsável Atual</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaAcervo"></tbody>
+                    </table>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <script>
+        const API_OITIVAS = 'http://localhost:8080';
+        const API_DOC = 'http://localhost:8081';
+        let usuarioLogado = null;
+        let listaFuncionarios = [];
+        let bancoAcervo = [];
+        let confirmAction = null;
+
+        // ── SESSÃO ────────────────────────────────────────────
+        (function carregarSessao() {
+            const salvo = sessionStorage.getItem('usuarioLogado');
+            if (!salvo) {
+                window.location.href = '../index.html';
+                return;
+            }
+            usuarioLogado = JSON.parse(salvo);
+            document.getElementById('lblUsuario').innerText = usuarioLogado.nome;
+            document.getElementById('lblCargo').innerText = usuarioLogado.cargo;
+            document.getElementById('lblRegResponsavel').innerText = usuarioLogado.nome;
+
+            carregarFuncionarios();
+            carregarMinhaPosse();
+            carregarPendentes();
+
+            if (usuarioLogado.cargo !== 'POLICIAL') {
+                document.getElementById('menu-sec-acervo').remove();
+            }
+        })();
+
+        function voltarModulos() { window.location.href = '../index.html'; }
+
+        function efetuarLogout() {
+            sessionStorage.removeItem('usuarioLogado');
+            window.location.href = '../index.html';
+        }
+
+        // ── UTILITÁRIOS ───────────────────────────────────────
+        function exibirNotificacao(mensagem, tipo = "success") {
+            const toast = document.getElementById('customToast');
+            toast.innerText = mensagem;
+            toast.style.backgroundColor = tipo === "error" ? "#e53e3e" : "#1e3a5f";
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        }
+
+        function solicitarConfirmacao(mensagem, acao) {
+            document.getElementById('confirmMessage').innerText = mensagem;
+            document.getElementById('customConfirmModal').style.display = 'flex';
+            confirmAction = acao;
+        }
+
+        document.getElementById('btnConfirmCancel').addEventListener('click', () => {
+            document.getElementById('customConfirmModal').style.display = 'none';
+            confirmAction = null;
+        });
+
+        document.getElementById('btnConfirmOk').addEventListener('click', () => {
+            document.getElementById('customConfirmModal').style.display = 'none';
+            if (confirmAction) confirmAction();
+            confirmAction = null;
+        });
+
+        function mudarAba(secaoId) {
+            document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('active'));
+
+            document.getElementById(secaoId).classList.add('active');
+            document.getElementById('menu-' + secaoId).classList.add('active');
+
+            if (secaoId === 'sec-pendentes') carregarPendentes();
+            if (secaoId === 'sec-solicitacoes') carregarMinhasSolicitacoes();
+            if (secaoId === 'sec-repassar') carregarMinhaPosse();
+            if (secaoId === 'sec-acervo') carregarAcervo();
+        }
+
+        // ── FUNCIONÁRIOS (pra popular o select de destino) ───
+        async function carregarFuncionarios() {
+            try {
+                const resp = await fetch(`${API_OITIVAS}/funcionarios`);
+                listaFuncionarios = await resp.json();
+
+                const select = document.getElementById('repDestino');
+                select.innerHTML = '<option value="">-- Selecione o destinatário --</option>';
+
+                listaFuncionarios
+                    .filter(f => f.idFuncionario !== usuarioLogado.idFuncionario)
+                    .forEach(f => {
+                        const opt = document.createElement('option');
+                        opt.value = f.idFuncionario;
+                        opt.innerText = `${f.nome} (${f.login}) - ${f.cargo}`;
+                        select.appendChild(opt);
+                    });
+            } catch (e) {
+                exibirNotificacao("Erro ao carregar lista de funcionários.", "error");
+            }
+        }
+
+        // ── MINHA POSSE (pra popular o select de procedimento no repasse) ───
+        async function carregarMinhaPosse() {
+            try {
+                const resp = await fetch(`${API_DOC}/documentos/minhaposse?idFuncionario=${usuarioLogado.idFuncionario}`);
+                const lista = await resp.json();
+
+                const select = document.getElementById('repIdProcedimento');
+
+                if (lista.length === 0) {
+                    select.innerHTML = '<option value="">-- Você não possui procedimentos em posse --</option>';
+                    return;
+                }
+
+                select.innerHTML = '<option value="">-- Selecione um procedimento em sua posse --</option>';
+
+                lista.forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = p.idProcedimento;
+                    opt.innerText = `${String(p.numOcorrencia).padStart(3, '0')}/${p.anoOcorrencia} - ${p.crime}`;
+                    select.appendChild(opt);
+                });
+            } catch (e) {
+                exibirNotificacao("Erro ao carregar seus procedimentos.", "error");
+            }
+        }
+
+        // ── ACERVO PROCEDIMENTAL ───────────────────────────────
+        async function carregarAcervo() {
+            try {
+                const resp = await fetch(`${API_DOC}/documentos/acervo`);
+                bancoAcervo = await resp.json();
+                renderizarAcervo(bancoAcervo);
+            } catch (e) {
+                exibirNotificacao("Erro ao carregar o acervo procedimental.", "error");
+            }
+        }
+
+        function filtrarAcervo() {
+            const numFiltro = document.getElementById('buscaAcervoNum').value;
+            const statusFiltro = document.getElementById('buscaAcervoStatus').value;
+
+            const resultado = bancoAcervo.filter(p => {
+                const bateNum = numFiltro === '' || String(p.numOcorrencia).includes(numFiltro);
+                const bateStatus = statusFiltro === 'TODOS' || p.status === statusFiltro;
+                return bateNum && bateStatus;
+            });
+
+            renderizarAcervo(resultado);
+        }
+
+        function renderizarAcervo(lista) {
+            const corpo = document.getElementById('tabelaAcervo');
+            corpo.innerHTML = '';
+
+            if (lista.length === 0) {
+                corpo.innerHTML = `<tr><td colspan="3" class="empty-msg">Nenhum procedimento encontrado com os filtros atuais.</td></tr>`;
+                return;
+            }
+
+            lista.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <div><strong>Proc: ${String(p.numOcorrencia).padStart(3, '0')}/${p.anoOcorrencia}</strong></div>
+                        <div style="font-size:0.8rem; color:#4a5568;">${p.crime}</div>
+                    </td>
+                    <td>${p.funcionarioAtual}</td>
+                    <td><span class="badge-status status-${p.status}">${p.status}</span></td>
+                `;
+                corpo.appendChild(tr);
+            });
+        }
+
+        // ── REGISTRAR PROCEDIMENTO ────────────────────────────
+        async function registrarProcedimento(event) {
+            event.preventDefault();
+
+            const corpo = {
+                numOcorrencia: parseInt(document.getElementById('regNumOcorrencia').value),
+                anoOcorrencia: parseInt(document.getElementById('regAnoOcorrencia').value),
+                crime: document.getElementById('regCrime').value,
+                idFuncionario: usuarioLogado.idFuncionario,
+                observacao: document.getElementById('regObservacao').value
+            };
+
+            try {
+                const resp = await fetch(`${API_DOC}/documentos/registrar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(corpo)
+                });
+                const dados = await resp.json();
+                if (dados.sucesso) {
+                    document.getElementById('formRegistrar').reset();
+                    document.getElementById('regAnoOcorrencia').value = "2026";
+                    exibirNotificacao(`Procedimento registrado! ID interno: ${dados.idProcedimento}`);
+                } else {
+                    exibirNotificacao("Erro: " + (dados.erro || "verifique os dados."), "error");
+                }
+            } catch (e) {
+                exibirNotificacao("Erro ao conectar com o servidor de documentos.", "error");
+            }
+        }
+
+        // ── SOLICITAR REPASSE ─────────────────────────────────
+        async function solicitarRepasse(event) {
+            event.preventDefault();
+
+            const corpo = {
+                idProcedimento: parseInt(document.getElementById('repIdProcedimento').value),
+                idFuncionarioOrigem: usuarioLogado.idFuncionario,
+                idFuncionarioDestino: parseInt(document.getElementById('repDestino').value),
+                observacao: document.getElementById('repObservacao').value
+            };
+
+            try {
+                const resp = await fetch(`${API_DOC}/documentos/repassar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(corpo)
+                });
+                const dados = await resp.json();
+                if (dados.sucesso) {
+                    document.getElementById('formRepassar').reset();
+                    exibirNotificacao("Repasse solicitado com sucesso!");
+                } else {
+                    exibirNotificacao("Erro: " + (dados.erro || "verifique os dados."), "error");
+                }
+            } catch (e) {
+                exibirNotificacao("Erro ao conectar com o servidor de documentos.", "error");
+            }
+        }
+
+        // ── PENDENTES (CONFIRMAR / RECUSAR) ──────────────────
+        async function carregarPendentes() {
+            try {
+                const resp = await fetch(`${API_DOC}/documentos/pendentes?idFuncionario=${usuarioLogado.idFuncionario}`);
+                const pendentes = await resp.json();
+                renderizarPendentes(pendentes);
+            } catch (e) {
+                exibirNotificacao("Erro ao carregar repasses pendentes.", "error");
+            }
+        }
+
+        function renderizarPendentes(pendentes) {
+            const corpo = document.getElementById('tabelaPendentes');
+            corpo.innerHTML = '';
+
+            if (pendentes.length === 0) {
+                corpo.innerHTML = `<tr><td colspan="5" class="empty-msg">Nenhum repasse pendente no momento.</td></tr>`;
+                return;
+            }
+
+            pendentes.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <div><strong>Proc: ${String(r.numOcorrencia).padStart(3, '0')}/${r.anoOcorrencia}</strong></div>
+                        <div style="font-size:0.8rem; color:#4a5568;">${r.crime}</div>
+                    </td>
+                    <td>${r.funcionarioOrigem}</td>
+                    <td>${r.dataSolicitacao}</td>
+                    <td>${r.observacao || '-'}</td>
+                    <td>
+                        <button class="btn-action btn-confirmar" onclick="confirmarRepasse(${r.idRepasse})">Confirmar</button>
+                        <button class="btn-action btn-recusar" onclick="recusarRepasse(${r.idRepasse})">Recusar</button>
+                    </td>
+                `;
+                corpo.appendChild(tr);
+            });
+        }
+
+        // ── MINHAS SOLICITAÇÕES DE REPASSE ────────────────────
+        async function carregarMinhasSolicitacoes() {
+            try {
+                const resp = await fetch(`${API_DOC}/documentos/minhassolicitacoes?idFuncionario=${usuarioLogado.idFuncionario}`);
+                const lista = await resp.json();
+                renderizarSolicitacoes(lista);
+            } catch (e) {
+                exibirNotificacao("Erro ao carregar suas solicitações de repasse.", "error");
+            }
+        }
+
+        function renderizarSolicitacoes(lista) {
+            const corpo = document.getElementById('tabelaSolicitacoes');
+            corpo.innerHTML = '';
+
+            if (lista.length === 0) {
+                corpo.innerHTML = `<tr><td colspan="5" class="empty-msg">Você ainda não solicitou nenhum repasse.</td></tr>`;
+                return;
+            }
+
+            lista.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <div><strong>Proc: ${String(r.numOcorrencia).padStart(3, '0')}/${r.anoOcorrencia}</strong></div>
+                        <div style="font-size:0.8rem; color:#4a5568;">${r.crime}</div>
+                    </td>
+                    <td>${r.funcionarioDestino}</td>
+                    <td>${r.dataSolicitacao}</td>
+                    <td><span class="badge-status status-${r.status}">${r.status}</span></td>
+                    <td>${r.observacao || '-'}</td>
+                `;
+                corpo.appendChild(tr);
+            });
+        }
+
+
+        async function confirmarRepasse(idRepasse) {
+            solicitarConfirmacao("Confirmar o recebimento deste procedimento?", async () => {
+                try {
+                    const resp = await fetch(`${API_DOC}/documentos/confirmar`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ idRepasse, idFuncionario: usuarioLogado.idFuncionario })
+                    });
+                    const dados = await resp.json();
+                    if (dados.sucesso) {
+                        exibirNotificacao("Repasse confirmado! A posse foi transferida.");
+                        carregarPendentes();
+                    } else {
+                        exibirNotificacao("Erro: " + (dados.erro || "não foi possível confirmar."), "error");
+                    }
+                } catch (e) {
+                    exibirNotificacao("Erro ao conectar com o servidor de documentos.", "error");
+                }
+            });
+        }
+
+        async function recusarRepasse(idRepasse) {
+            solicitarConfirmacao("Recusar este repasse?", async () => {
+                try {
+                    const resp = await fetch(`${API_DOC}/documentos/recusar`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ idRepasse, idFuncionario: usuarioLogado.idFuncionario })
+                    });
+                    const dados = await resp.json();
+                    if (dados.sucesso) {
+                        exibirNotificacao("Repasse recusado.");
+                        carregarPendentes();
+                    } else {
+                        exibirNotificacao("Erro: " + (dados.erro || "não foi possível recusar."), "error");
+                    }
+                } catch (e) {
+                    exibirNotificacao("Erro ao conectar com o servidor de documentos.", "error");
+                }
+            });
+        }
+
+        // ── CONSULTAR POSSE ───────────────────────────────────
+        async function consultarPosse(event) {
+            event.preventDefault();
+            const numOcorrencia = document.getElementById('consNumOcorrencia').value;
+            const anoOcorrencia = document.getElementById('consAnoOcorrencia').value;
+            const div = document.getElementById('resultadoPosse');
+
+            try {
+                const resp = await fetch(`${API_DOC}/documentos/posse?numOcorrencia=${numOcorrencia}&anoOcorrencia=${anoOcorrencia}`);
+                const dados = await resp.json();
+
+                if (dados.sucesso) {
+                    div.style.display = 'block';
+
+                    let botaoAcao = '';
+                    if (dados.idFuncionarioAtual === usuarioLogado.idFuncionario) {
+                        if (dados.status === 'ATIVO') {
+                            botaoAcao = `<button class="btn-action btn-recusar" style="margin-top: 15px; width: 100%;" onclick="arquivarProcedimento(${dados.idProcedimento})">Arquivar Procedimento</button>`;
+                        } else {
+                            botaoAcao = `<button class="btn-action btn-confirmar" style="margin-top: 15px; width: 100%;" onclick="desarquivarProcedimento(${dados.idProcedimento})">Desarquivar Procedimento</button>`;
+                        }
+                    }
+
+                    div.innerHTML = `
+                        <div class="linha"><span>Procedimento</span><span>${String(dados.numOcorrencia).padStart(3, '0')}/${dados.anoOcorrencia}</span></div>
+                        <div class="linha"><span>Crime</span><span>${dados.crime}</span></div>
+                        <div class="linha"><span>Responsável Atual</span><span><strong>${dados.funcionarioAtual}</strong></span></div>
+                        <div class="linha"><span>Data da Posse</span><span>${dados.dataPosse}</span></div>
+                        <div class="linha"><span>Status</span><span class="badge-status status-${dados.status}">${dados.status}</span></div>
+                        <div class="linha"><span>Observação</span><span>${dados.observacao || '-'}</span></div>
+                        ${botaoAcao}
+                    `;
+                } else {
+                    div.style.display = 'block';
+                    div.innerHTML = `<p class="empty-msg">${dados.erro || 'Procedimento não encontrado no sistema cartorário.'}</p>`;
+                }
+            } catch (e) {
+                exibirNotificacao("Erro ao conectar com o servidor de documentos.", "error");
+            }
+        }
+
+        // ── ARQUIVAR / DESARQUIVAR ────────────────────────────
+        async function arquivarProcedimento(idProcedimento) {
+            solicitarConfirmacao("Arquivar este procedimento? Ele não poderá mais ser repassado enquanto arquivado.", async () => {
+                try {
+                    const resp = await fetch(`${API_DOC}/documentos/arquivar`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ idProcedimento, idFuncionario: usuarioLogado.idFuncionario })
+                    });
+                    const dados = await resp.json();
+                    if (dados.sucesso) {
+                        exibirNotificacao("Procedimento arquivado com sucesso.");
+                        document.getElementById('formConsultar').requestSubmit();
+                    } else {
+                        exibirNotificacao("Erro: " + (dados.erro || "não foi possível arquivar."), "error");
+                    }
+                } catch (e) {
+                    exibirNotificacao("Erro ao conectar com o servidor de documentos.", "error");
+                }
+            });
+        }
+
+        async function desarquivarProcedimento(idProcedimento) {
+            solicitarConfirmacao("Desarquivar este procedimento? Ele voltará a poder ser repassado.", async () => {
+                try {
+                    const resp = await fetch(`${API_DOC}/documentos/desarquivar`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ idProcedimento, idFuncionario: usuarioLogado.idFuncionario })
+                    });
+                    const dados = await resp.json();
+                    if (dados.sucesso) {
+                        exibirNotificacao("Procedimento desarquivado com sucesso.");
+                        document.getElementById('formConsultar').requestSubmit();
+                    } else {
+                        exibirNotificacao("Erro: " + (dados.erro || "não foi possível desarquivar."), "error");
+                    }
+                } catch (e) {
+                    exibirNotificacao("Erro ao conectar com o servidor de documentos.", "error");
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,40 +1,53 @@
 package agenda_oitiva.model;
+
 import java.time.LocalDateTime;
 
 public class ProcedimentoPolicial {
+	private int idProcedimento;
 	private int numeroOcorrencia;
 	private int anoOcorrencia;
 	private String crime;
 
+	// Construtor para criação nova (antes de existir no banco, sem ID ainda)
 	public ProcedimentoPolicial(int numeroOcorrencia, int anoOcorrencia, String crime) {
 		setNumeroOcorrencia(numeroOcorrencia);
 		setAnoOcorrencia(anoOcorrencia);
 		setCrime(crime);
+	}
 
+	// Construtor para reconstrução via DAO (já existe no banco, com ID real)
+	public ProcedimentoPolicial(int idProcedimento, int numeroOcorrencia, int anoOcorrencia, String crime) {
+		this.idProcedimento = idProcedimento;
+		setNumeroOcorrencia(numeroOcorrencia);
+		setAnoOcorrencia(anoOcorrencia);
+		setCrime(crime);
+	}
+
+	public int getIdProcedimento() {
+		return idProcedimento;
 	}
 
 	public int getNumeroOcorrencia() {
 		return numeroOcorrencia;
 	}
-	
+
 	public void setNumeroOcorrencia(int numeroOcorrencia) {
-		if(numeroOcorrencia <= 0) {
+		if (numeroOcorrencia <= 0) {
 			throw new IllegalArgumentException("Número do Ocorrência Negativo ou Zerado!");
-		}else {
+		} else {
 			this.numeroOcorrencia = numeroOcorrencia;
 		}
 	}
-	
 
 	public int getAnoOcorrencia() {
 		return anoOcorrencia;
 	}
-	
+
 	public void setAnoOcorrencia(int anoOcorrencia) {
 		int anoAtual = LocalDateTime.now().getYear();
-		if(anoOcorrencia > anoAtual || anoOcorrencia < 1980) {
+		if (anoOcorrencia > anoAtual || anoOcorrencia < 1980) {
 			throw new IllegalArgumentException("Digite um Ano Válido!");
-		}else {
+		} else {
 			this.anoOcorrencia = anoOcorrencia;
 		}
 	}
@@ -42,20 +55,18 @@ public class ProcedimentoPolicial {
 	public String getCrime() {
 		return crime;
 	}
-	
+
 	public void setCrime(String crime) {
-		if(crime == null || crime.strip().isEmpty()) {
+		if (crime == null || crime.strip().isEmpty()) {
 			throw new IllegalArgumentException("Crime Nulo ou Vazio");
-		}else {
+		} else {
 			this.crime = crime;
 		}
 	}
 
 	@Override
-    public String toString() {
-        return "Procedimento Policial"
-        	+ " | Número da Ocorrência: " + numeroOcorrencia
-            + " | Ano: " + anoOcorrencia
-            + " | Crime: " + crime;
-    }
+	public String toString() {
+		return "Procedimento Policial" + " | Número da Ocorrência: " + numeroOcorrencia + " | Ano: " + anoOcorrencia
+				+ " | Crime: " + crime;
+	}
 }

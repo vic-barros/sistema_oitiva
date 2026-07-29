@@ -3,82 +3,237 @@ package agenda_oitiva.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 
 import agenda_oitiva.config.ConexaoBD;
 import agenda_oitiva.model.CargoFuncional;
 import agenda_oitiva.model.FuncionarioDelegacia;
+import agenda_oitiva.model.StatusCadastro;
 
 public class FuncionarioDAO {
 
-    private PessoaDAO pessoaDAO = new PessoaDAO();
+	private PessoaDAO pessoaDAO = new PessoaDAO();
 
-    public int inserir(FuncionarioDelegacia funcionario) {
-        int idPessoa = pessoaDAO.inserir(funcionario);
+	public int inserir(FuncionarioDelegacia funcionario) {
+		String cpf = funcionario.getCpf();
+		int idPessoa;
 
-        String sql = "INSERT INTO funcionario (id_pessoa, login, senha_hash, cargo) " +
-                     "VALUES (?, ?, ?, ?::cargo_funcional) RETURNING id_funcionario";
+		if (cpf != null && pessoaDAO.existePorCpf(cpf)) {
+			idPessoa = pessoaDAO.buscarIdPorCpf(cpf);
+			FuncionarioDelegacia existente = buscarPorIdPessoa(idPessoa);
 
-        try (Connection conn = ConexaoBD.conectar();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+			if (existente != null) {
+				if (existente.getStatusCadastro() == StatusCadastro.RECUSADO) {
+					reativar(existente.getIdFuncionario(), funcionario);
+					return existente.getIdFuncionario();
+				}
+				throw new IllegalStateException("Já existe cadastro de funcionário para este CPF (status: "
+						+ existente.getStatusCadastro() + ").");
+			}
+			// pessoa existe (ex: já apareceu como depoente numa oitiva), mas nunca foi
+			// funcionário
+		} else {
+			idPessoa = pessoaDAO.inserir(funcionario);
+		}
 
-            stmt.setInt(1, idPessoa);
-            stmt.setString(2, funcionario.getLogin());
-            stmt.setString(3, funcionario.getSenhaHash());
-            stmt.setString(4, funcionario.getCargo().name());
+		String sql = "INSERT INTO funcionario (id_pessoa, login, senha_hash, cargo," + " is_admin, status_cadastro) "
+				+ "VALUES (?, ?, ?, ?::cargo_funcional, ?, ?::status_cadastro_enum) RETURNING id_funcionario";
 
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) return rs.getInt("id_funcionario");
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Erro ao inserir funcionario: " + e.getMessage());
-        }
-        return -1;
-    }
+		try (Connection conn = ConexaoBD.conectar(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setInt(1, idPessoa);
+			stmt.setString(2, funcionario.getLogin());
+			stmt.setString(3, funcionario.getSenhaHash());
+			stmt.setString(4, funcionario.getCargo().name());
+			stmt.setBoolean(5, funcionario.isAdmin());
+			stmt.setString(6, funcionario.getStatusCadastro().name());
 
-    public FuncionarioDelegacia buscarPorLogin(String login) {
-        String sql = "SELECT p.nome, p.cpf, f.login, f.senha_hash, f.cargo " +
-                     "FROM funcionario f " +
-                     "JOIN pessoa p ON f.id_pessoa = p.id_pessoa " +
-                     "WHERE f.login = ?";
+			try (ResultSet rs = stmt.executeQuery()) {
+				if (rs.next())
+					return rs.getInt("id_funcionario");
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Erro ao inserir funcionario: " + e.getMessage());
+		}
+		return -1;
+	}
 
-        try (Connection conn = ConexaoBD.conectar();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+	public FuncionarioDelegacia buscarPorLogin(String login) {
+		String sql = "SELECT f.id_funcionario, p.nome, p.cpf, f.login, f.senha_hash, f.cargo, "
+				+ "f.is_admin, f.status_cadastro " + "FROM funcionario f "
+				+ "JOIN pessoa p ON f.id_pessoa = p.id_pessoa " + "WHERE f.login = ?";
+		try (Connection conn = ConexaoBD.conectar(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setString(1, login);
+			try (ResultSet rs = stmt.executeQuery()) {
+				if (rs.next()) {
+					CargoFuncional cargo = CargoFuncional.valueOf(rs.getString("cargo"));
+					StatusCadastro statusCadastro = StatusCadastro.valueOf(rs.getString("status_cadastro"));
+					return new FuncionarioDelegacia(rs.getInt("id_funcionario"), rs.getString("nome"),
+							rs.getString("cpf"), cargo, rs.getString("login"), rs.getString("senha_hash").trim(),
+							rs.getBoolean("is_admin"), statusCadastro);
+				}
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Erro ao buscar funcionario: " + e.getMessage());
+		}
+		return null;
+	}
 
-            stmt.setString(1, login);
+	public int buscarIdPorLogin(String login) {
+		String sql = "SELECT id_funcionario FROM funcionario WHERE login = ?";
 
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    CargoFuncional cargo = CargoFuncional.valueOf(rs.getString("cargo"));
-                    return new FuncionarioDelegacia(
-                        rs.getString("nome"),
-                        rs.getString("cpf"),
-                        cargo,
-                        rs.getString("login"),
-                        rs.getString("senha_hash"), // hash puro do banco
-                        true                        // sinaliza que já é hash
-                    );
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Erro ao buscar funcionario: " + e.getMessage());
-        }
-        return null;
-    }
+		try (Connection conn = ConexaoBD.conectar(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-    public int buscarIdPorLogin(String login) {
-        String sql = "SELECT id_funcionario FROM funcionario WHERE login = ?";
+			stmt.setString(1, login);
 
-        try (Connection conn = ConexaoBD.conectar();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+			try (ResultSet rs = stmt.executeQuery()) {
+				if (rs.next())
+					return rs.getInt("id_funcionario");
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Erro ao buscar id funcionario: " + e.getMessage());
+		}
+		return -1;
+	}
 
-            stmt.setString(1, login);
+	public FuncionarioDelegacia buscarPorId(int idFuncionario) {
+		String sql = "SELECT f.id_funcionario, p.nome, p.cpf, f.login, f.senha_hash, f.cargo, "
+				+ "f.is_admin, f.status_cadastro " + "FROM funcionario f "
+				+ "JOIN pessoa p ON f.id_pessoa = p.id_pessoa " + "WHERE f.id_funcionario = ?";
 
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) return rs.getInt("id_funcionario");
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Erro ao buscar id funcionario: " + e.getMessage());
-        }
-        return -1;
-    }
+		try (Connection conn = ConexaoBD.conectar(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+			stmt.setInt(1, idFuncionario);
+
+			try (ResultSet rs = stmt.executeQuery()) {
+				if (rs.next()) {
+					CargoFuncional cargo = CargoFuncional.valueOf(rs.getString("cargo"));
+					StatusCadastro statusCadastro = StatusCadastro.valueOf(rs.getString("status_cadastro"));
+					return new FuncionarioDelegacia(rs.getInt("id_funcionario"), rs.getString("nome"),
+							rs.getString("cpf"), cargo, rs.getString("login"), rs.getString("senha_hash").trim(),
+							rs.getBoolean("is_admin"), statusCadastro);
+				}
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Erro ao buscar funcionário por ID: " + e.getMessage());
+		}
+		return null;
+	}
+
+	public FuncionarioDelegacia buscarPorIdPessoa(int idPessoa) {
+		String sql = "SELECT f.id_funcionario, p.nome, p.cpf, f.login, f.senha_hash, f.cargo, "
+				+ "f.is_admin, f.status_cadastro " + "FROM funcionario f "
+				+ "JOIN pessoa p ON f.id_pessoa = p.id_pessoa " + "WHERE f.id_pessoa = ?";
+
+		try (Connection conn = ConexaoBD.conectar(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setInt(1, idPessoa);
+			try (ResultSet rs = stmt.executeQuery()) {
+				if (rs.next()) {
+					CargoFuncional cargo = CargoFuncional.valueOf(rs.getString("cargo"));
+					StatusCadastro statusCadastro = StatusCadastro.valueOf(rs.getString("status_cadastro"));
+					return new FuncionarioDelegacia(rs.getInt("id_funcionario"), rs.getString("nome"),
+							rs.getString("cpf"), cargo, rs.getString("login"), rs.getString("senha_hash").trim(),
+							rs.getBoolean("is_admin"), statusCadastro);
+				}
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Erro ao buscar funcionario por id_pessoa: " + e.getMessage());
+		}
+		return null;
+	}
+
+	public ArrayList<FuncionarioDelegacia> listarPendentes() {
+		String sql = "SELECT f.id_funcionario, p.nome, p.cpf, f.login, f.senha_hash, f.cargo, "
+				+ "f.is_admin, f.status_cadastro " + "FROM funcionario f "
+				+ "JOIN pessoa p ON f.id_pessoa = p.id_pessoa " + "WHERE f.status_cadastro = ?::status_cadastro_enum";
+
+		ArrayList<FuncionarioDelegacia> lista = new ArrayList<>();
+
+		try (Connection conn = ConexaoBD.conectar(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+			stmt.setString(1, StatusCadastro.PENDENTE.name());
+
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next()) {
+					CargoFuncional cargo = CargoFuncional.valueOf(rs.getString("cargo"));
+					StatusCadastro statusCadastro = StatusCadastro.valueOf(rs.getString("status_cadastro"));
+					lista.add(new FuncionarioDelegacia(rs.getInt("id_funcionario"), rs.getString("nome"),
+							rs.getString("cpf"), cargo, rs.getString("login"), rs.getString("senha_hash").trim(),
+							rs.getBoolean("is_admin"), statusCadastro));
+				}
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Erro ao listar pendentes: " + e.getMessage());
+		}
+		return lista;
+	}
+
+	public ArrayList<FuncionarioDelegacia> listarAprovados() {
+		String sql = "SELECT f.id_funcionario, p.nome, p.cpf, f.login, f.senha_hash, f.cargo, "
+				+ "f.is_admin, f.status_cadastro " + "FROM funcionario f "
+				+ "JOIN pessoa p ON f.id_pessoa = p.id_pessoa " + "WHERE f.status_cadastro = ?::status_cadastro_enum";
+
+		ArrayList<FuncionarioDelegacia> lista = new ArrayList<>();
+
+		try (Connection conn = ConexaoBD.conectar(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+			stmt.setString(1, StatusCadastro.APROVADO.name());
+
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next()) {
+					CargoFuncional cargo = CargoFuncional.valueOf(rs.getString("cargo"));
+					StatusCadastro statusCadastro = StatusCadastro.valueOf(rs.getString("status_cadastro"));
+					lista.add(new FuncionarioDelegacia(rs.getInt("id_funcionario"), rs.getString("nome"),
+							rs.getString("cpf"), cargo, rs.getString("login"), rs.getString("senha_hash").trim(),
+							rs.getBoolean("is_admin"), statusCadastro));
+				}
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Erro ao listar aprovados: " + e.getMessage());
+		}
+		return lista;
+	}
+
+	public void atualizarStatus(int idFuncionario, StatusCadastro novoStatus) {
+		String sql = "UPDATE funcionario SET status_cadastro = ?::status_cadastro_enum " + "WHERE id_funcionario = ?";
+
+		try (Connection conn = ConexaoBD.conectar(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+			stmt.setString(1, novoStatus.name());
+			stmt.setInt(2, idFuncionario);
+			stmt.executeUpdate();
+
+		} catch (Exception e) {
+			throw new RuntimeException("Erro ao atualizar status do cadastro: " + e.getMessage());
+		}
+	}
+
+	public void resetarSenha(int idFuncionario, String novaSenha) {
+		String sql = "UPDATE funcionario SET senha_hash = ? WHERE id_funcionario = ?";
+
+		try (Connection conn = ConexaoBD.conectar(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+			stmt.setString(1, FuncionarioDelegacia.gerarHash(novaSenha));
+			stmt.setInt(2, idFuncionario);
+			stmt.executeUpdate();
+
+		} catch (Exception e) {
+			throw new RuntimeException("Erro ao resetar senha: " + e.getMessage());
+		}
+	}
+
+	public void reativar(int idFuncionario, FuncionarioDelegacia dados) {
+		String sql = "UPDATE funcionario SET login = ?, senha_hash = ?, cargo = ?::cargo_funcional, "
+				+ "status_cadastro = 'PENDENTE'::status_cadastro_enum WHERE id_funcionario = ?";
+
+		try (Connection conn = ConexaoBD.conectar(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setString(1, dados.getLogin());
+			stmt.setString(2, dados.getSenhaHash());
+			stmt.setString(3, dados.getCargo().name());
+			stmt.setInt(4, idFuncionario);
+			stmt.executeUpdate();
+		} catch (Exception e) {
+			throw new RuntimeException("Erro ao reativar cadastro: " + e.getMessage());
+		}
+	}
+
 }

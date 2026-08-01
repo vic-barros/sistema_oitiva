@@ -11,7 +11,7 @@ Este sistema permite o gerenciamento de duas frentes de trabalho de uma delegaci
 - **Módulo Oitivas** — controle de depoentes, procedimentos policiais e agendamento de oitivas.
 - **Módulo Documentos** — controle de posse e repasse (cadeia de custódia) de procedimentos policiais entre funcionários, incluindo arquivamento e uma visão consolidada de todo o acervo (aba "Acervo Procedimental").
 
-Desenvolvido como projeto acadêmico do curso de **Análise e Sistemas de Desenvolvimento (ADS)** no **Instituto Federal de Sergipe**, com aplicação real em ambiente de trabalho da autora na Polícia Civil.
+Desenvolvido como projeto acadêmico do curso de **Análise e Sistemas de Desenvolvimento (ADS)** no **Instituto Federal de Sergipe**.
 
 ---
 
@@ -110,7 +110,7 @@ Acesso restrito a `POLICIAL`.
 
 ### 1. Clonar o repositório
 ```bash
-git clone [LINK_DO_REPOSITORIO]
+git clone https://github.com/vic-barros/sistema_oitiva.git
 ```
 
 ### 2. Criar o banco de dados
@@ -196,7 +196,7 @@ Cada tela do front end valida o acesso de forma independente, com base nos dados
 
 ## 👩‍💻 Autora
 
-Desenvolvido por **Victoria** — 3º Período de ADS · IFS · 2026.
+Desenvolvido por **Laíssa Victória Barros** — 3º Período de ADS · IFS · 2026.
 
 ---
 
